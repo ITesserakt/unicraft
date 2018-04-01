@@ -59,6 +59,7 @@
         <Compile Include="Assets\Scripts\Managers\MakeDestroy.cs"/>
         <Compile Include="Assets\Scripts\Managers\Managers.cs"/>
         <Compile Include="Assets\Scripts\Managers\StartupController.cs"/>
+        <Compile Include="Assets\Scripts\Managers\WorldControl.cs"/>
         <Compile Include="Assets\Scripts\Managers\WorldGenerator.cs"/>
         <Compile Include="Assets\Scripts\Messenger.cs"/>
         <Compile Include="Assets\Scripts\Mod\Mod.cs"/>
@@ -167,10 +168,10 @@
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-         Other similar extension points exist, see Microsoft.Common.targets.
-    <Target Name="BeforeBuild">
-    </Target>
-    <Target Name="AfterBuild">
-    </Target>
-    -->
+           Other similar extension points exist, see Microsoft.Common.targets.
+      <Target Name="BeforeBuild">
+      </Target>
+      <Target Name="AfterBuild">
+      </Target>
+      -->
 </Project>

@@ -27,8 +27,8 @@ namespace Core
             });
 
             Bedrock = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            new BlockFactory().SimpleFactory(Bedrock, new BlockBuilder(){
-                id = 1,
+			new BlockFactory().SimpleFactory(Bedrock, new BlockBuilder(){
+				id = 1,
 				shortName = "adminium_block",
 				fullName = "Bedrock",
 				isHarvest = false,

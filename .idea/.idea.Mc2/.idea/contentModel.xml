@@ -16,6 +16,7 @@
             <e p="MakeDestroy.cs" t="Include" />
             <e p="Managers.cs" t="Include" />
             <e p="StartupController.cs" t="Include" />
+            <e p="WorldControl.cs" t="Include" />
             <e p="WorldGenerator.cs" t="Include" />
           </e>
           <e p="Messenger.cs" t="Include" />
