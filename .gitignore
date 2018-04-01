@@ -1,0 +1,4 @@
+*.cs.meta
+*.meta
+**/[Tt]emp
+**/[Ll]ibrary
