@@ -14,47 +14,65 @@ namespace mc2.general {
     }
 
     public class BlockFactory : BlockBuilder {
-        public void SimpleFactory(GameObject g, BlockBuilder builder) {
-            g.AddComponent<Block> ();
+        public static void SimpleFactory(GameObject g, BlockBuilder builder) {
+            g.AddComponent<Block>();
 
-            var block = g.GetComponent<Block> ();
-            block.Id = builder.id;
-            block.ShortName = builder.shortName;
-            block.FullName = builder.fullName;
-            block.IsHarvest = builder.isHarvest;
-            block.NearestBlocks = Physics.OverlapBox (g.transform.position, new Vector3 (1.5f, 1.5f, 1.5f));
+            var block = g.GetComponent<Block>();
+            block.Id = builder.Id;
+            block.ShortName = builder.ShortName;
+            block.FullName = builder.FullName;
+            block.IsHarvest = builder.IsHarvest;
+            block.NearestBlocks = Physics.OverlapBox(g.transform.position, new Vector3(1.5f, 1.5f, 1.5f));
 
-            g.GetComponent<Renderer> ().sharedMaterials = builder.mats;
-            g.GetComponent<MeshFilter> ().mesh = builder.mesh;
+            g.GetComponent<Renderer>().sharedMaterials = builder.Mats;
+            g.GetComponent<MeshFilter>().mesh = builder.Mesh;
 
-            g.name = builder.fullName;
+            g.name = builder.FullName;
 
-            g.transform.Rotate (builder.rotation);
+            g.transform.Rotate(builder.Rotation);
         }
     }
 
     public class BlockBuilder {
-        public uint id { get; protected internal set; }
 
-        public string shortName { get; protected internal set; }
-
-        public string fullName { get; protected internal set; }
-
+        private uint _id = 0;
         private bool _isHarvest = true;
+        private string _shortName;
+        private string _fullName;
 
-        public bool isHarvest {
-            get {
-                return _isHarvest;
-            }
+        public uint Id {
+            get { return _id; }
             protected internal set {
-                _isHarvest = value;
+                GameRegistry.RegId(value);
+                _id = value;
             }
         }
 
-        public Material[] mats { get; protected internal set; }
+        public string ShortName {
+            get { return _shortName; }
+            protected internal set {
+                GameRegistry.RegSName(value);
+                _shortName = value;
+            }
+        }
 
-        public Mesh mesh { get; protected internal set; }
+        public string FullName {
+            get { return _fullName; }
+            protected internal set {
+                GameRegistry.RegFName(value);
+                _fullName = value;
+            }
+        }
 
-        public Vector3 rotation { get; protected internal set; }
+        public bool IsHarvest {
+            get { return _isHarvest; }
+            protected internal set { _isHarvest = value; }
+        }
+
+        public Material[] Mats { get; protected internal set; }
+
+        public Mesh Mesh { get; protected internal set; }
+
+        public Vector3 Rotation { get; protected internal set; }
     }
 }

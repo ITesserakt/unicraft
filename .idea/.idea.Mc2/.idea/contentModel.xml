@@ -7,10 +7,18 @@
       <e p="Assembly-CSharp-firstpass.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
       <e p="Assets" t="Include">
+        <e p="Plugins" t="Include">
+          <e p="Editor" t="Include">
+            <e p="JetBrains" t="Include">
+              <e p="Unity3DRider.cs" t="Include" />
+            </e>
+          </e>
+        </e>
         <e p="Scripts" t="Include">
           <e p="Block.cs" t="Include" />
           <e p="Data.cs" t="Include" />
           <e p="GameEvents.cs" t="Include" />
+          <e p="GameRegistry.cs" t="Include" />
           <e p="Managers" t="Include">
             <e p="GameManager.cs" t="Include" />
             <e p="MakeDestroy.cs" t="Include" />
@@ -25,10 +33,16 @@
           </e>
           <e p="Modules" t="Include">
             <e p="Core.cs" t="Include" />
-            <e p="core.py" t="Include" />
           </e>
           <e p="Noise.cs" t="Include" />
           <e p="Timer.cs" t="Include" />
+        </e>
+        <e p="Standard Assets" t="Include">
+          <e p="Editor" t="Include">
+            <e p="CrossPlatformInput" t="Include">
+              <e p="CrossPlatformInputInitialize.cs" t="Include" />
+            </e>
+          </e>
         </e>
       </e>
       <e p="Library" t="ExcludeRecursive" />

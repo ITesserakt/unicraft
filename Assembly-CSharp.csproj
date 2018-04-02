@@ -55,6 +55,7 @@
         <Compile Include="Assets\Scripts\Block.cs"/>
         <Compile Include="Assets\Scripts\Data.cs"/>
         <Compile Include="Assets\Scripts\GameEvents.cs"/>
+        <Compile Include="Assets\Scripts\GameRegistry.cs"/>
         <Compile Include="Assets\Scripts\Managers\GameManager.cs"/>
         <Compile Include="Assets\Scripts\Managers\MakeDestroy.cs"/>
         <Compile Include="Assets\Scripts\Managers\Managers.cs"/>
@@ -163,15 +164,12 @@
             <Name>Assembly-CSharp-firstpass</Name>
         </ProjectReference>
     </ItemGroup>
-    <ItemGroup>
-        <Content Include="Assets\Scripts\Modules\core.py"/>
-    </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-           Other similar extension points exist, see Microsoft.Common.targets.
-      <Target Name="BeforeBuild">
-      </Target>
-      <Target Name="AfterBuild">
-      </Target>
-      -->
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
 </Project>

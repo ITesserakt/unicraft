@@ -5,47 +5,44 @@ using Core;
 using mc2.general;
 using UnityEngine;
 
-namespace mc2.managers
-{
-    public enum ManagerStatus
-    {
+namespace mc2.managers {
+    public enum ManagerStatus {
         Shutdown,
         Initializing,
         Started
     }
 
     [RequireComponent(typeof(WorldGenerator), typeof(StartupController), typeof(MakeDestroy))]
-    public sealed class Managers : MonoBehaviour
-    {
-        public static readonly List<string> BlockTags = new List<string>
-        {
+    public sealed class Managers : MonoBehaviour {
+        public static readonly List<string> BlockTags = new List<string> {
             "BreakableBlock",
             "UnbreakableBlock"
         };
 
         private List<GameManager> _startSequence;
+        
         public static GameObject Player { get; private set; }
         public static WorldGenerator WGenerator { get; private set; }
         public static MakeDestroy MkDest { get; private set; }
+        public static WorldControl WControl { get; private set; }
 
-        private void Awake()
-        {
+        private void Awake() {
             // ReSharper disable once UnusedVariable
             var core = new Main();
             Player = GameObject.FindWithTag("Player");
             WGenerator = GetComponent<WorldGenerator>();
             MkDest = GetComponent<MakeDestroy>();
+            WControl = Player.GetComponent<WorldControl>();
 
-            _startSequence = new List<GameManager>
-            {
+            _startSequence = new List<GameManager> {
+                MkDest,
                 WGenerator,
-                MkDest
+                WControl
             };
             StartCoroutine(StartupManagers());
         }
 
-        private IEnumerator StartupManagers()
-        {
+        private IEnumerator StartupManagers() {
             foreach (var manager in _startSequence) manager.Loading(manager);
 
             yield return null;
@@ -53,25 +50,22 @@ namespace mc2.managers
             var numModules = _startSequence.Count;
             var numReady = 0;
 
-            while (numReady < numModules)
-            {
+            while (numReady < numModules) {
                 var lastReady = numReady;
                 numReady = 0;
 
                 foreach (var manager in _startSequence)
-                    switch (manager.Status)
-                    {
+                    switch (manager.Status) {
                         case ManagerStatus.Started:
                             numReady++;
                             break;
                         case ManagerStatus.Shutdown:
                             Debug.Log(string.Format("Something wrong in module {0}, in object {1}", manager,
-                                manager.Exception));
+                                                    manager.Exception));
                             break;
                     }
 
-                if (numReady > lastReady)
-                {
+                if (numReady > lastReady) {
                     Debug.Log(string.Format("Loading process: {0}/{1}", numReady, numModules));
                     Messenger<int, int>.Broadcast(GameEvents.ManagersInProgress, numReady, numModules);
                 }
@@ -83,15 +77,26 @@ namespace mc2.managers
             Messenger.Broadcast(GameEvents.ManagersStarted);
         }
 
-        public static GameObject FindByName(IEnumerable<GameObject> collection, string name)
-        {
-            return collection.FirstOrDefault(item => item != null && item.name == name);
+        public static GameObject FindByName(IEnumerable<GameObject> collection, string name) {
+            var gameObjects = collection as GameObject[] ?? collection.ToArray();
+            for (var i = 0; i < gameObjects.Count(); i++) {
+                if (gameObjects[i] != null && gameObjects[i].name == name) {
+                    return gameObjects[i];
+                }
+            }
+
+            return null;
         }
 
-        public static GameObject FindById(IEnumerable<GameObject> collection, uint id)
-        {
-            return collection.FirstOrDefault(gameObject =>
-                gameObject != null && gameObject.GetComponent<Block>().Id == id);
+        public static GameObject FindById(IEnumerable<GameObject> collection, uint id) {
+            var gameObjects = collection as GameObject[] ?? collection.ToArray();
+            for (var i = 0; i < gameObjects.Count(); i++) {
+                if (gameObjects[i] != null && gameObjects[i].GetComponent<Block>().Id == id) {
+                    return gameObjects[i];
+                }
+            }
+
+            return null;
         }
     }
 }
