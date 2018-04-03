@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Core;
 using mc2.general;
+using UniRx;
 using UnityEngine;
 
 namespace mc2.managers {
@@ -39,11 +40,17 @@ namespace mc2.managers {
                 WGenerator,
                 WControl
             };
-            StartCoroutine(StartupManagers());
+            
+            Observable.FromCoroutine(StartupManagers)
+                      .Subscribe(
+                          _ => Debug.Log("All modules started")
+                      );
         }
 
         private IEnumerator StartupManagers() {
-            foreach (var manager in _startSequence) manager.Loading(manager);
+            _startSequence.ForEach(
+                manager => manager.Loading(manager)
+            );
 
             yield return null;
 
@@ -73,7 +80,6 @@ namespace mc2.managers {
                 yield return new WaitForEndOfFrame();
             }
 
-            Debug.Log("All modules started");
             Messenger.Broadcast(GameEvents.ManagersStarted);
         }
 
