@@ -1,4 +1,5 @@
 ﻿using mc2.general;
+using UniRx;
 using UnityEngine;
 
 
@@ -8,7 +9,10 @@ namespace mc2.managers {
 
         protected internal override void Loading(GameManager manager) {
             base.Loading(manager);
-            Messenger<GameObject>.AddListener(GameEvents.BlockUpdate, OnBUpdate);
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.id == GameEvents.BlockUpdate)
+                         .Subscribe(msg => OnBUpdate((GameObject) msg.data));
             //Managers.WGenerator.World.ForEach(i => i.GetComponent<Collider>().enabled = false);
             Status = ManagerStatus.Started;
         }
@@ -19,10 +23,6 @@ namespace mc2.managers {
             
             _block = obj.GetComponent<Block>();
             _block.NearestBlocks = Physics.OverlapBox(_block.transform.position, new Vector3(1.5f, 1.5f, 1.5f));
-        }
-
-        private void OnDestroy() {
-            Messenger<GameObject>.RemoveListener(GameEvents.BlockUpdate, OnBUpdate);
         }
 
         /*

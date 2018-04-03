@@ -1,4 +1,6 @@
+using System;
 using mc2.general;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,14 +13,20 @@ namespace mc2.managers
         private void Awake()
         {
             _progressBar.gameObject.SetActive(true);
-            Messenger<int, int>.AddListener(GameEvents.ManagersInProgress, OnManInProg);
-            Messenger.AddListener(GameEvents.ManagersStarted, OnStarted);
-        }
-
-        private void OnDestroy()
-        {
-            Messenger<int, int>.RemoveListener(GameEvents.ManagersInProgress, OnManInProg);
-            Messenger.RemoveListener(GameEvents.ManagersStarted, OnStarted);
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.id == GameEvents.ManagersInProgress)
+                         .Subscribe(
+                             msg => {
+                                 var arg1 = Convert.ToInt32(((string) msg.data).Split(' ')[0]);
+                                 var arg2 = Convert.ToInt32(((string) msg.data).Split(' ')[1]);
+                                 OnManInProg(arg1, arg2);
+                             }
+                         );
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.id == GameEvents.ManagersStarted)
+                         .Subscribe(_ => OnStarted());
         }
 
         private void OnManInProg(int arg1, int arg2)

@@ -5,6 +5,7 @@ using Core;
 using mc2.general;
 using UniRx;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace mc2.managers {
     public enum ManagerStatus {
@@ -74,13 +75,16 @@ namespace mc2.managers {
 
                 if (numReady > lastReady) {
                     Debug.Log(string.Format("Loading process: {0}/{1}", numReady, numModules));
-                    Messenger<int, int>.Broadcast(GameEvents.ManagersInProgress, numReady, numModules);
+                    MessageBroker.Default
+                                 .Publish(Messenger.Create(this, GameEvents.ManagersInProgress,
+                                                           numReady + " " + numModules));
                 }
 
                 yield return new WaitForEndOfFrame();
             }
 
-            Messenger.Broadcast(GameEvents.ManagersStarted);
+            MessageBroker.Default
+                         .Publish(Messenger.Create(this, GameEvents.ManagersStarted, null));
         }
 
         public static GameObject FindByName(IEnumerable<GameObject> collection, string name) {

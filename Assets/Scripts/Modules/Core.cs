@@ -11,7 +11,7 @@ namespace Core {
         public static GameObject Bedrock;
 
         public Main() {
-            
+
             Dirt = GameObject.CreatePrimitive(PrimitiveType.Cube);
             BlockFactory.SimpleFactory(Dirt, new BlockBuilder {
                 Id = 0,
@@ -35,9 +35,19 @@ namespace Core {
                 }
             });
 
-            Messenger<RaycastHit>.AddListener(GameEvents.LeftCl, OnLeftClick);
-            Messenger<RaycastHit>.AddListener(GameEvents.MidCl, OnMiddleClick);
-            Messenger<RaycastHit, Transform>.AddListener(GameEvents.RightCl, OnRightClick);
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.id == GameEvents.LeftCl)
+                         .Subscribe(msg => OnLeftClick((RaycastHit) msg.data));
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.id == GameEvents.MidCl)
+                         .Subscribe(msg => OnMiddleClick((RaycastHit) msg.data));
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.id == GameEvents.RightCl)
+                         .Subscribe(msg => OnRightClick(((RightClickArgs) msg.data).Hit,
+                                                        ((RightClickArgs) msg.data).Block));
         }
 
         private static void OnRightClick(RaycastHit hit, Transform block) {

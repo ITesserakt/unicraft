@@ -1,4 +1,5 @@
 using mc2.general;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -40,15 +41,18 @@ namespace mc2.managers {
             PhantomControl(hit);
 
             if (Input.GetMouseButtonUp(0)) {
-                Messenger<RaycastHit>.Broadcast(GameEvents.LeftCl, hit);
+                MessageBroker.Default
+                             .Publish(Messenger.Create(this, GameEvents.LeftCl, hit));
             }
 
             if (Input.GetMouseButtonUp(1)) {
-                Messenger<RaycastHit, Transform>.Broadcast(GameEvents.RightCl, hit, _block);
+                MessageBroker.Default
+                             .Publish(Messenger.Create(this, GameEvents.RightCl, new RightClickArgs(hit, _block)));
             }
 
             if (Input.GetMouseButtonUp(2))
-                Messenger<RaycastHit>.Broadcast(GameEvents.MidCl, hit);
+                MessageBroker.Default
+                             .Publish(Messenger.Create(this, GameEvents.MidCl, hit));
         }
 
         public bool RightClick(Transform arg1, RaycastHit arg2) {
@@ -61,14 +65,16 @@ namespace mc2.managers {
 
             var clone = Managers.WGenerator.ClonePlace(arg1.gameObject, pos, chTransform);
 
-            Messenger<GameObject>.Broadcast(GameEvents.BlockUpdate, clone);
+            MessageBroker.Default
+                         .Publish(Messenger.Create(this, GameEvents.BlockUpdate, clone));
             return clone != null;
         }
 
         public bool LeftClick(RaycastHit hit) {
             if (hit.transform.CompareTag(Managers.BlockTags[0]))
                 Destroy(hit.collider.gameObject);
-            Messenger<GameObject>.Broadcast(GameEvents.BlockUpdate, hit.transform.gameObject);
+            MessageBroker.Default
+                         .Publish(Messenger.Create(this, GameEvents.BlockUpdate, hit.transform.gameObject));
             return true;
         }
 
