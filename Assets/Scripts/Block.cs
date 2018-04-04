@@ -18,7 +18,7 @@ namespace mc2.general {
             g.AddComponent<Block>();
 
             var block = g.GetComponent<Block>();
-            block.Id = builder.Id;
+            block.Id = GameRegistry.RegId();
             block.ShortName = builder.ShortName;
             block.FullName = builder.FullName;
             block.IsHarvest = builder.IsHarvest;
@@ -35,18 +35,9 @@ namespace mc2.general {
 
     public class BlockBuilder {
 
-        private uint _id = 0;
         private bool _isHarvest = true;
         private string _shortName;
         private string _fullName;
-
-        public uint Id {
-            get { return _id; }
-            protected internal set {
-                GameRegistry.RegId(value);
-                _id = value;
-            }
-        }
 
         public string ShortName {
             get { return _shortName; }

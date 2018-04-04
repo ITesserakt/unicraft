@@ -14,7 +14,6 @@ namespace mc2.managers {
         Started
     }
 
-    [RequireComponent(typeof(WorldGenerator), typeof(StartupController), typeof(MakeDestroy))]
     public sealed class Managers : MonoBehaviour {
         public static readonly List<string> BlockTags = new List<string> {
             "BreakableBlock",
@@ -29,8 +28,7 @@ namespace mc2.managers {
         public static WorldControl WControl { get; private set; }
 
         private void Awake() {
-            // ReSharper disable once UnusedVariable
-            var core = new Main();
+            new Main();
             Player = GameObject.FindWithTag("Player");
             WGenerator = GetComponent<WorldGenerator>();
             MkDest = GetComponent<MakeDestroy>();
@@ -59,7 +57,6 @@ namespace mc2.managers {
             var numReady = 0;
 
             while (numReady < numModules) {
-                var lastReady = numReady;
                 numReady = 0;
 
                 foreach (var manager in _startSequence)
@@ -73,12 +70,11 @@ namespace mc2.managers {
                             break;
                     }
 
-                if (numReady > lastReady) {
-                    Debug.Log(string.Format("Loading process: {0}/{1}", numReady, numModules));
-                    MessageBroker.Default
-                                 .Publish(Messenger.Create(this, GameEvents.ManagersInProgress,
-                                                           numReady + " " + numModules));
-                }
+
+                Debug.Log(string.Format("Loading process: {0}/{1}", numReady, numModules));
+                MessageBroker.Default
+                             .Publish(Messenger.Create(this, GameEvents.ManagersInProgress, numReady, numModules));
+
 
                 yield return new WaitForEndOfFrame();
             }
@@ -88,25 +84,11 @@ namespace mc2.managers {
         }
 
         public static GameObject FindByName(IEnumerable<GameObject> collection, string name) {
-            var gameObjects = collection as GameObject[] ?? collection.ToArray();
-            for (var i = 0; i < gameObjects.Count(); i++) {
-                if (gameObjects[i] != null && gameObjects[i].name == name) {
-                    return gameObjects[i];
-                }
-            }
-
-            return null;
+            return collection.FirstOrDefault(g => g != null && g.name == name);
         }
 
         public static GameObject FindById(IEnumerable<GameObject> collection, uint id) {
-            var gameObjects = collection as GameObject[] ?? collection.ToArray();
-            for (var i = 0; i < gameObjects.Count(); i++) {
-                if (gameObjects[i] != null && gameObjects[i].GetComponent<Block>().Id == id) {
-                    return gameObjects[i];
-                }
-            }
-
-            return null;
+            return collection.FirstOrDefault(g => g != null && g.GetComponent<Block>().Id == id);
         }
     }
 }

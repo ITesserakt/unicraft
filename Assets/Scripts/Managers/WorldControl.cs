@@ -11,8 +11,8 @@ namespace mc2.managers {
             base.Loading(manager);
             MessageBroker.Default
                          .Receive<Messenger>()
-                         .Where(msg => msg.id == GameEvents.BlockUpdate)
-                         .Subscribe(msg => OnBUpdate((GameObject) msg.data));
+                         .Where(msg => msg.Id == GameEvents.BlockUpdate)
+                         .Subscribe(msg => OnBUpdate((GameObject) msg.Data[0]));
             //Managers.WGenerator.World.ForEach(i => i.GetComponent<Collider>().enabled = false);
             Status = ManagerStatus.Started;
         }

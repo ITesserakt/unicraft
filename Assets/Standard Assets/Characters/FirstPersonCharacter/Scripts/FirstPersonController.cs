@@ -1,4 +1,5 @@
 using System;
+using UniRx;
 using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
@@ -26,7 +27,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private float m_StepInterval;
         [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
-        [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+        [SerializeField] private AudioClip m_LandSound;   // the sound played when character touches back on ground.
+
+        [SerializeField] private GameObject _plane;
+        public static bool IsPause;
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -59,11 +63,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
 
         // Update is called once per frame
-        private void Update()
-        {
-            RotateView();
+        private void Update() {
+            if (!IsPause)
+                RotateView();
             // the jump state needs to read here to make sure it is not missed
-
             m_Jump = CrossPlatformInputManager.GetButton("Jump");
 
             if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
@@ -126,7 +129,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
 
             ProgressStepCycle(speed);
-            UpdateCameraPosition(speed);
+            if (!IsPause)
+                UpdateCameraPosition(speed);
 
             m_MouseLook.UpdateCursorLock();
         }

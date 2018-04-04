@@ -14,18 +14,17 @@ namespace Core {
 
             Dirt = GameObject.CreatePrimitive(PrimitiveType.Cube);
             BlockFactory.SimpleFactory(Dirt, new BlockBuilder {
-                Id = 0,
                 ShortName = "dirt_block",
                 FullName = "Dirt",
                 Mats = new[] {
                     Resources.Load<Material>("Dirt")
                 },
-                Mesh = GameObject.Find("Data").GetComponent<Data>().meshes[0]
+                Mesh = GameObject.Find("Data").GetComponent<Data>().meshes[0],
+                IsHarvest = true
             });
 
             Bedrock = GameObject.CreatePrimitive(PrimitiveType.Cube);
             BlockFactory.SimpleFactory(Bedrock, new BlockBuilder() {
-                Id = 1,
                 ShortName = "adminium_block",
                 FullName = "Bedrock",
                 IsHarvest = false,
@@ -37,17 +36,16 @@ namespace Core {
 
             MessageBroker.Default
                          .Receive<Messenger>()
-                         .Where(msg => msg.id == GameEvents.LeftCl)
-                         .Subscribe(msg => OnLeftClick((RaycastHit) msg.data));
+                         .Where(msg => msg.Id == GameEvents.LeftCl)
+                         .Subscribe(msg => OnLeftClick((RaycastHit) msg.Data[0]));
             MessageBroker.Default
                          .Receive<Messenger>()
-                         .Where(msg => msg.id == GameEvents.MidCl)
-                         .Subscribe(msg => OnMiddleClick((RaycastHit) msg.data));
+                         .Where(msg => msg.Id == GameEvents.MidCl)
+                         .Subscribe(msg => OnMiddleClick((RaycastHit) msg.Data[0]));
             MessageBroker.Default
                          .Receive<Messenger>()
-                         .Where(msg => msg.id == GameEvents.RightCl)
-                         .Subscribe(msg => OnRightClick(((RightClickArgs) msg.data).Hit,
-                                                        ((RightClickArgs) msg.data).Block));
+                         .Where(msg => msg.Id == GameEvents.RightCl)
+                         .Subscribe(msg => OnRightClick((RaycastHit) msg.Data[0], (Transform) msg.Data[1]));
         }
 
         private static void OnRightClick(RaycastHit hit, Transform block) {

@@ -29,6 +29,12 @@ namespace mc2.managers {
         }
 
         private void Update() {
+
+            if (PauseScreen.IsPause.Value) {
+                _highLight.SetActive(false);
+                return;
+            }
+
             var ray = _camera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (!Physics.Raycast(ray, out hit, MaxDistance)) {
@@ -47,7 +53,7 @@ namespace mc2.managers {
 
             if (Input.GetMouseButtonUp(1)) {
                 MessageBroker.Default
-                             .Publish(Messenger.Create(this, GameEvents.RightCl, new RightClickArgs(hit, _block)));
+                             .Publish(Messenger.Create(this, GameEvents.RightCl, hit, _block));
             }
 
             if (Input.GetMouseButtonUp(2))
@@ -96,7 +102,8 @@ namespace mc2.managers {
                 (Managers.Player.transform.position - hit.transform.position).sqrMagnitude < MinDistance)
                 _highLight.SetActive(false);
 
-            _highLight.GetComponent<MeshFilter>().mesh = hit.transform.GetComponent<MeshFilter>().mesh;
+            if (hit.transform.GetComponent<MeshFilter>() != null)
+                _highLight.GetComponent<MeshFilter>().mesh = hit.transform.GetComponent<MeshFilter>().mesh;
             _highLight.transform.position = hit.transform.position;
             _highLight.SetActive(true);
         }

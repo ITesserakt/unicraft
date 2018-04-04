@@ -4,40 +4,23 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace mc2.managers
-{
-    public class StartupController : MonoBehaviour
-    {
+namespace mc2.managers {
+    internal class StartupController : MonoBehaviour {
         [SerializeField] private Slider _progressBar;
 
-        private void Awake()
-        {
+        private void Awake() {
             _progressBar.gameObject.SetActive(true);
             MessageBroker.Default
                          .Receive<Messenger>()
-                         .Where(msg => msg.id == GameEvents.ManagersInProgress)
+                         .Where(msg => msg.Id == GameEvents.ManagersInProgress)
                          .Subscribe(
-                             msg => {
-                                 var arg1 = Convert.ToInt32(((string) msg.data).Split(' ')[0]);
-                                 var arg2 = Convert.ToInt32(((string) msg.data).Split(' ')[1]);
-                                 OnManInProg(arg1, arg2);
-                             }
+                             msg => _progressBar.value =
+                                 (float) (Convert.ToDecimal(msg.Data[0]) / Convert.ToDecimal(msg.Data[1]))
                          );
             MessageBroker.Default
                          .Receive<Messenger>()
-                         .Where(msg => msg.id == GameEvents.ManagersStarted)
-                         .Subscribe(_ => OnStarted());
-        }
-
-        private void OnManInProg(int arg1, int arg2)
-        {
-            var progress = arg1 / (float) arg2;
-            _progressBar.value = progress;
-        }
-
-        private void OnStarted()
-        {
-            _progressBar.gameObject.SetActive(false);
+                         .Where(msg => msg.Id == GameEvents.ManagersStarted)
+                         .Subscribe(_ => _progressBar.gameObject.SetActive(false));
         }
     }
 }

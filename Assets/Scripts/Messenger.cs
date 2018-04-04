@@ -2,18 +2,18 @@
 
 namespace mc2.general {
     public class Messenger {
-        public MonoBehaviour sender { get; private set; }
-        public uint id { get; private set; }
-        public System.Object data { get; private set; }
+        public MonoBehaviour Sender { get; private set; }
+        public uint Id { get; private set; }
+        public System.Object[] Data { get; private set; }
 
-        public Messenger(MonoBehaviour sender, uint id, System.Object data) {
-            this.sender = sender;
-            this.id = id;
-            this.data = data;
+        public Messenger(MonoBehaviour sender, uint id, params System.Object[] objects) {
+            Sender = sender;
+            Id = id;
+            Data = objects;
         }
 
-        public static Messenger Create(MonoBehaviour sender, uint id, System.Object data) {
-            return new Messenger(sender, id, data);
+        public static Messenger Create(MonoBehaviour sender, uint id, params System.Object[] objects) {
+            return new Messenger(sender, id, objects);
         }
     }
 }
