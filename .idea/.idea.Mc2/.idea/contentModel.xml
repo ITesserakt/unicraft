@@ -300,6 +300,8 @@
             <e p="Core.cs" t="Include" />
           </e>
           <e p="Noise.cs" t="Include" />
+          <e p="PauseScreen.cs" t="Include" />
+          <e p="SettingsScreen.cs" t="Include" />
           <e p="Timer.cs" t="Include" />
         </e>
         <e p="Standard Assets" t="Include">
@@ -312,6 +314,21 @@
                 <e p="MouseLook.cs" t="Include" />
                 <e p="RigidbodyFirstPersonController.cs" t="Include" />
               </e>
+            </e>
+            <e p="RollerBall" t="Include">
+              <e p="RollerBallGuidelines.txt" t="Include" />
+              <e p="Scripts" t="Include">
+                <e p="Ball.cs" t="Include" />
+                <e p="BallUserControl.cs" t="Include" />
+              </e>
+            </e>
+            <e p="ThirdPersonCharacter" t="Include">
+              <e p="Scripts" t="Include">
+                <e p="AICharacterControl.cs" t="Include" />
+                <e p="ThirdPersonCharacter.cs" t="Include" />
+                <e p="ThirdPersonUserControl.cs" t="Include" />
+              </e>
+              <e p="ThirdPersonCharacterGuidelines.txt" t="Include" />
             </e>
           </e>
           <e p="CrossPlatformInput" t="Include">
@@ -335,11 +352,6 @@
           <e p="Editor" t="Include">
             <e p="CrossPlatformInput" t="Include">
               <e p="CrossPlatformInputInitialize.cs" t="Include" />
-            </e>
-          </e>
-          <e p="Fonts" t="Include">
-            <e p="OpenSans" t="Include">
-              <e p="License!.txt" t="Include" />
             </e>
           </e>
           <e p="Utility" t="Include">

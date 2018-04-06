@@ -1,35 +1,26 @@
+using System;
 using mc2.general;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace mc2.managers
-{
-    public class StartupController : MonoBehaviour
-    {
+namespace mc2.managers {
+    internal class StartupController : MonoBehaviour {
         [SerializeField] private Slider _progressBar;
 
-        private void Awake()
-        {
+        private void Awake() {
             _progressBar.gameObject.SetActive(true);
-            Messenger<int, int>.AddListener(GameEvents.ManagersInProgress, OnManInProg);
-            Messenger.AddListener(GameEvents.ManagersStarted, OnStarted);
-        }
-
-        private void OnDestroy()
-        {
-            Messenger<int, int>.RemoveListener(GameEvents.ManagersInProgress, OnManInProg);
-            Messenger.RemoveListener(GameEvents.ManagersStarted, OnStarted);
-        }
-
-        private void OnManInProg(int arg1, int arg2)
-        {
-            var progress = arg1 / (float) arg2;
-            _progressBar.value = progress;
-        }
-
-        private void OnStarted()
-        {
-            _progressBar.gameObject.SetActive(false);
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.Id == GameEvents.ManagersInProgress)
+                         .Subscribe(
+                             msg => _progressBar.value =
+                                 (float) (Convert.ToDecimal(msg.Data[0]) / Convert.ToDecimal(msg.Data[1]))
+                         );
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.Id == GameEvents.ManagersStarted)
+                         .Subscribe(_ => _progressBar.gameObject.SetActive(false));
         }
     }
 }

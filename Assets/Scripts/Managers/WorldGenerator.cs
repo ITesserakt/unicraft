@@ -1,8 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Core;
 using mc2.general;
+using UniRx;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace mc2.managers {
     public class WorldGenerator : GameManager {
@@ -12,7 +15,7 @@ namespace mc2.managers {
         private float[,] _noiseMap;
 
         private uint _numberOfClones, _numberOfInstances;
-        [SerializeField] private bool _overrideLoad;
+        private GameObject _world;
 
         public List<GameObject> Voxels { get; private set; }
         public List<GameObject> World { get; private set; }
@@ -27,28 +30,58 @@ namespace mc2.managers {
             World = new List<GameObject>();
             Chunks = new List<GameObject>();
             _noiseMap = new float[Width * _countOfChunks, Width * _countOfChunks];
+            _world = new GameObject("World");
 
             var hud = GameObject.Find("HUD");
             if (!IsLoad(hud, "HUD")) return;
 
             Voxels.AddRange(new[] {Main.Dirt, Main.Bedrock});
-            Managers.Player.transform.position = new Vector3(_countOfChunks / 2 * 16 + 1, _height + 100,
+            Managers.Player.transform.position = new Vector3(_countOfChunks / 2 * 16 + 1, _height + 10,
                                                              _countOfChunks / 2 * 16 + 1);
-            _noiseMap = Noise.GenerateNoiseMap(Width * _countOfChunks, Width * _countOfChunks, 25,
-                                               Random.Range(0, 1000), 1, 1, 2, new Vector2());
 
-            StartCoroutine(Generator(_countOfChunks));
+            var random = Random.Range(0, int.MaxValue);
+            /*Observable.Start(() => Noise.GenerateNoiseMap(1000, 1000, 25, random, 1, 1, 2,
+                                                          new Vector2()), Scheduler.ThreadPool)
+                      .ObserveOnMainThread(MainThreadDispatchType.Update)
+                      .Subscribe(ret => _noiseMap = ret);*/
 
+            _noiseMap = Noise.GenerateNoiseMap(1000, 1000, 25, random, 1, 1, 2, new Vector2());
+
+            GenerateSpawnArea();
+            
             Status = ManagerStatus.Started;
         }
 
-        private IEnumerator Generator(int chunks) {
-            var world = new GameObject("World");
+        private void Generator() {
+            var playerPos = Managers.Player.transform;
+            var playerPosFChunk = new Vector2Int(Mathf.FloorToInt(playerPos.position.x / Width),
+                                                 Mathf.FloorToInt(playerPos.position.y / Width));
+            
+            var nearFPlayerChunks = new Vector2Int[9] {
+                playerPosFChunk - Vector2Int.one,
+                playerPosFChunk - Vector2Int.right,
+                playerPosFChunk - new Vector2Int(1, -1),
+                playerPosFChunk - Vector2Int.up,
+                playerPosFChunk,
+                playerPosFChunk - Vector2Int.down,
+                playerPosFChunk - new Vector2Int(-1, 1),
+                playerPosFChunk - Vector2Int.left,
+                playerPosFChunk - new Vector2Int(-1, -1)
+            };
+                
+            for (var i = 0; i < 9; i++)
+                if (Managers.FindByName(Chunks, "Chunk " + nearFPlayerChunks[i].x + ":" + nearFPlayerChunks[i].y) ==
+                    null) {
+                    MakeChunk(nearFPlayerChunks[i].x, nearFPlayerChunks[i].y, _world.transform).ToObservable()
+                                                                                               .Subscribe();
+                }
+        }
 
-            for (var x = 0; x < chunks; x++)
-                for (var z = 0; z < chunks; z++) {
-                    StartCoroutine(MakeChunk(x, z, world.transform));
-                    yield return new WaitForEndOfFrame();
+        private void GenerateSpawnArea() {
+            for (var x = 0; x < _countOfChunks; x++)
+                for (var z = 0; z < _countOfChunks; z++) {
+                    MakeChunk(x, z, _world.transform).ToObservable()
+                                                    .Subscribe();
                 }
         }
 
@@ -71,16 +104,12 @@ namespace mc2.managers {
                         
                         //TODO: добавить авто-условия для генерации мира
                     }
-
-                    _numberOfInstances++;
-                    if (_numberOfInstances >= 50) {
-                        _numberOfInstances = 0;
-                        yield return null;
-                    }
                 }
 
             chunk.transform.SetParent(wTransform);
             Chunks.Add(chunk);
+
+            yield return null;
         }
 
         /// <summary>

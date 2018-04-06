@@ -11,21 +11,20 @@ namespace Core {
         public static GameObject Bedrock;
 
         public Main() {
-            
+
             Dirt = GameObject.CreatePrimitive(PrimitiveType.Cube);
             BlockFactory.SimpleFactory(Dirt, new BlockBuilder {
-                Id = 0,
                 ShortName = "dirt_block",
                 FullName = "Dirt",
                 Mats = new[] {
                     Resources.Load<Material>("Dirt")
                 },
-                Mesh = GameObject.Find("Data").GetComponent<Data>().meshes[0]
+                Mesh = GameObject.Find("Data").GetComponent<Data>().meshes[0],
+                IsHarvest = true
             });
 
             Bedrock = GameObject.CreatePrimitive(PrimitiveType.Cube);
             BlockFactory.SimpleFactory(Bedrock, new BlockBuilder() {
-                Id = 1,
                 ShortName = "adminium_block",
                 FullName = "Bedrock",
                 IsHarvest = false,
@@ -35,21 +34,30 @@ namespace Core {
                 }
             });
 
-            Messenger<RaycastHit>.AddListener(GameEvents.LeftCl, OnLeftClick);
-            Messenger<RaycastHit>.AddListener(GameEvents.MidCl, OnMiddleClick);
-            Messenger<RaycastHit, Transform>.AddListener(GameEvents.RightCl, OnRightClick);
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.Id == GameEvents.LeftCl)
+                         .Subscribe(msg => OnLeftClick((RaycastHit) msg.Data[0]));
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.Id == GameEvents.MidCl)
+                         .Subscribe(msg => OnMiddleClick((RaycastHit) msg.Data[0]));
+            MessageBroker.Default
+                         .Receive<Messenger>()
+                         .Where(msg => msg.Id == GameEvents.RightCl)
+                         .Subscribe(msg => OnRightClick((RaycastHit) msg.Data[0], (Transform) msg.Data[1]));
         }
 
         private static void OnRightClick(RaycastHit hit, Transform block) {
-            if (Managers.MkDest.RightClick(block, hit)) ;
+            Managers.MkDest.RightClick(block, hit);
         }
 
         private static void OnMiddleClick(RaycastHit hit) {
-            if (Managers.MkDest.MiddleClick(hit)) ;
+            Managers.MkDest.MiddleClick(hit);
         }
 
         private static void OnLeftClick(RaycastHit hit) {
-            if (Managers.MkDest.LeftClick(hit)) ;
+            Managers.MkDest.LeftClick(hit);
         }
 
     }
