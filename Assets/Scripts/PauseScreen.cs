@@ -37,22 +37,23 @@ namespace mc2.general {
             Observable.EveryUpdate()
                       .Where(_ => Input.GetKeyUp(KeyCode.Escape))
                       .Subscribe(_ => {
+                          if (_settings.activeSelf) return;
                           if (!IsPause.Value) {
                               _panel.SetActive(true);
                               Time.timeScale = 0;
-                              
+
                               Cursor.lockState = CursorLockMode.None;
                               Cursor.visible = true;
-                              
+
                               IsPause.Value = !IsPause.Value;
                           }
                           else {
                               _panel.SetActive(false);
                               Time.timeScale = 1;
-                              
+
                               Cursor.lockState = CursorLockMode.Locked;
                               Cursor.visible = false;
-                              
+
                               IsPause.Value = !IsPause.Value;
                           }
                       });

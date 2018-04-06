@@ -49,15 +49,15 @@ namespace Core {
         }
 
         private static void OnRightClick(RaycastHit hit, Transform block) {
-            if (Managers.MkDest.RightClick(block, hit)) ;
+            Managers.MkDest.RightClick(block, hit);
         }
 
         private static void OnMiddleClick(RaycastHit hit) {
-            if (Managers.MkDest.MiddleClick(hit)) ;
+            Managers.MkDest.MiddleClick(hit);
         }
 
         private static void OnLeftClick(RaycastHit hit) {
-            if (Managers.MkDest.LeftClick(hit)) ;
+            Managers.MkDest.LeftClick(hit);
         }
 
     }
