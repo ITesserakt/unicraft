@@ -1,24 +1,28 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace mc2.general {
     public static class GameRegistry {
+        
+        public static Dictionary<string, GameObject> RegisteredBlocks {
+            get { return _registeredBlocks; }
+            private set { _registeredBlocks = value; }
+        }
 
-        private static uint id;
+        private static uint _bufferedId;
         private static string[] _namesBuffered = new string[0];
+        private static Dictionary<string, GameObject> _registeredBlocks = new Dictionary<string, GameObject>();
 
-        private const string Exception = "Блок с данным {0} уже существует; последний {0} - ";
 
         public static uint RegId() {
-            return id++;
+            return _bufferedId++;
         }
 
         public static void RegSName(string shortName) {
             if (_namesBuffered.Contains(shortName)) {
-                throw new ArgumentException(
-                    string.Format(Exception, "короткое название") + _namesBuffered[_namesBuffered.Length - 1],
-                    "shortName");
+                throw new ArgumentException("Блок с данным названием уже существует", "shortName");
             }
 
             Array.Resize(ref _namesBuffered, _namesBuffered.Length + 1);
@@ -28,13 +32,15 @@ namespace mc2.general {
 
         public static void RegFName(string fullName) {
             if (_namesBuffered.Contains(fullName)) {
-                throw new ArgumentException(
-                    string.Format(Exception, "полное название") + _namesBuffered[_namesBuffered.Length - 1],
-                    "fullName");
+                throw new ArgumentException("Блок с данным названием уже существует", "fullName");
             }
 
             Array.Resize(ref _namesBuffered, _namesBuffered.Length + 1);
             _namesBuffered[_namesBuffered.Length - 1] = fullName;
+        }
+
+        public static void RegBlock(GameObject gameObject, Block block) {
+            RegisteredBlocks.Add(block.FullName, gameObject);
         }
     }
 }

@@ -28,7 +28,9 @@ namespace mc2.managers {
         public static WorldControl WControl { get; private set; }
 
         private void Awake() {
-            new Main();
+            new Main().PreLoad();
+            new Main().Load();
+            
             Player = GameObject.FindWithTag("Player");
             WGenerator = GetComponent<WorldGenerator>();
             MkDest = GetComponent<MakeDestroy>();
@@ -39,11 +41,9 @@ namespace mc2.managers {
                 WGenerator,
                 WControl
             };
-            
+
             Observable.FromCoroutine(StartupManagers)
-                      .Subscribe(
-                          _ => Debug.Log("All modules started")
-                      );
+                      .Subscribe(_ => Debug.Log("All modules started"));
         }
 
         private IEnumerator StartupManagers() {

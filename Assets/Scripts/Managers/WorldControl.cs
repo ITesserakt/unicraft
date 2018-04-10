@@ -13,7 +13,6 @@ namespace mc2.managers {
                          .Receive<Messenger>()
                          .Where(msg => msg.Id == GameEvents.BlockUpdate)
                          .Subscribe(msg => OnBUpdate((GameObject) msg.Data[0]));
-            //Managers.WGenerator.World.ForEach(i => i.GetComponent<Collider>().enabled = false);
             Status = ManagerStatus.Started;
         }
 
@@ -23,19 +22,29 @@ namespace mc2.managers {
             
             _block = obj.GetComponent<Block>();
             _block.NearestBlocks = Physics.OverlapBox(_block.transform.position, new Vector3(1.5f, 1.5f, 1.5f));
+
+            var parent = obj.transform.GetComponentInParent<Transform>();
+            Combine(parent.gameObject);
         }
 
-        /*
-        private void OnTriggerEnter(Collider other) {
-            if (other.GetComponent<Block>() != null) {
-                other.GetComponent<Collider>().enabled = true;
+        internal static void Combine(GameObject combineTo) {
+            MeshFilter[] meshFilters = combineTo.GetComponentsInChildren<MeshFilter>();
+            CombineInstance[] instances = new CombineInstance[meshFilters.Length];
+
+            var i = 0;
+            while (i < meshFilters.Length) {
+                instances[i].mesh = meshFilters[i].sharedMesh;
+                instances[i].transform = meshFilters[i].transform.localToWorldMatrix;
+                meshFilters[i] = null;
+                i++;
             }
+            
+            if (combineTo.transform.GetComponent<MeshFilter>() != null)
+                combineTo.transform.GetComponent<MeshFilter>().mesh = new Mesh();
+            else 
+                combineTo.AddComponent<MeshFilter>().mesh = new Mesh();
+            combineTo.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(instances);
+            combineTo.transform.gameObject.SetActive(true);
         }
-
-        private void OnTriggerExit(Collider other) {
-            if (other.GetComponent<Block>() != null)
-                other.GetComponent<Collider>().enabled = false;
-        }
-        */
     }
 }

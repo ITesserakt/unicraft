@@ -30,6 +30,8 @@ namespace mc2.general {
             g.name = builder.FullName;
 
             g.transform.Rotate(builder.Rotation);
+
+            GameRegistry.RegBlock(g, block);
         }
     }
 

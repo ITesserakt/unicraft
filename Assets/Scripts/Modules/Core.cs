@@ -5,13 +5,28 @@ using UniRx;
 using UnityEngine;
 
 namespace Core {
-    [Mod("core", "Core for mc2")]
-    public class Main {
+    public class Main : IMod {
+
         public static GameObject Dirt;
         public static GameObject Bedrock;
+        public static GameObject Grass;
 
-        public Main() {
+        public void OnRightClick(RaycastHit hit, Transform block) {
+            if (!hit.transform.CompareTag("Player"))
+                Managers.MkDest.RightClick(block, hit);
+        }
 
+        private static void OnMiddleClick(RaycastHit hit) {
+            if (!hit.transform.CompareTag("Player"))
+                Managers.MkDest.MiddleClick(hit);
+        }
+
+        public void OnLeftClick(RaycastHit hit) {
+            if (!hit.transform.CompareTag("Player"))
+                Managers.MkDest.LeftClick(hit);
+        }
+
+        public void PreLoad() {
             Dirt = GameObject.CreatePrimitive(PrimitiveType.Cube);
             BlockFactory.SimpleFactory(Dirt, new BlockBuilder {
                 ShortName = "dirt_block",
@@ -34,31 +49,33 @@ namespace Core {
                 }
             });
 
+            var grassFromTemplate = Resources.Load<GameObject>("Grass");
+            Grass = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            BlockFactory.SimpleFactory(Grass, new BlockBuilder {
+                ShortName = "grass_block",
+                FullName = "Grass",
+                IsHarvest = true,
+                Mesh = grassFromTemplate.GetComponent<MeshFilter>().sharedMesh,
+                Mats = grassFromTemplate.GetComponent<Renderer>().sharedMaterials,
+                Rotation = new Vector3(-90, 0)
+            });
+        }
+
+        public void Load() {
             MessageBroker.Default
                          .Receive<Messenger>()
                          .Where(msg => msg.Id == GameEvents.LeftCl)
                          .Subscribe(msg => OnLeftClick((RaycastHit) msg.Data[0]));
+
             MessageBroker.Default
                          .Receive<Messenger>()
                          .Where(msg => msg.Id == GameEvents.MidCl)
                          .Subscribe(msg => OnMiddleClick((RaycastHit) msg.Data[0]));
+
             MessageBroker.Default
                          .Receive<Messenger>()
                          .Where(msg => msg.Id == GameEvents.RightCl)
                          .Subscribe(msg => OnRightClick((RaycastHit) msg.Data[0], (Transform) msg.Data[1]));
         }
-
-        private static void OnRightClick(RaycastHit hit, Transform block) {
-            Managers.MkDest.RightClick(block, hit);
-        }
-
-        private static void OnMiddleClick(RaycastHit hit) {
-            Managers.MkDest.MiddleClick(hit);
-        }
-
-        private static void OnLeftClick(RaycastHit hit) {
-            Managers.MkDest.LeftClick(hit);
-        }
-
     }
 }
