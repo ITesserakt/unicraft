@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/.Rider2017.3/system/resharper-host/local/Transient/ReSharperHost/v11/SolutionCaches/_Mc2.-1858383930.00" t="ExcludeRecursive" />
-    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+    <e p="C:\Users\potry\.Rider2017.3\system\resharper-host\local\Transient\ReSharperHost\v11\SolutionCaches\_Mc2.-868493065.00" t="ExcludeRecursive" />
+    <e p="C:\Users\potry\Documents\Rider\MC2" t="IncludeRecursive">
       <e p="Assembly-CSharp-Editor-firstpass.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp-firstpass.csproj" t="IncludeRecursive" />
       <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
@@ -14,6 +14,21 @@
             </e>
           </e>
           <e p="UniRx" t="Include">
+            <e p="Examples" t="Include">
+              <e p="Sample01_ObservableWWW.cs" t="Include" />
+              <e p="Sample02_ObservableTriggers.cs" t="Include" />
+              <e p="Sample03_GameObjectAsObservable.cs" t="Include" />
+              <e p="Sample04_ConvertFromUnityCallback.cs" t="Include" />
+              <e p="Sample05_ConvertFromCoroutine.cs" t="Include" />
+              <e p="Sample06_ConvertToCoroutine.cs" t="Include" />
+              <e p="Sample07_OrchestratIEnumerator.cs" t="Include" />
+              <e p="Sample08_DetectDoubleClick.cs" t="Include" />
+              <e p="Sample09_EventHandling.cs" t="Include" />
+              <e p="Sample10_MainThreadDispatcher.cs" t="Include" />
+              <e p="Sample11_Logger.cs" t="Include" />
+              <e p="Sample12_ReactiveProperty.cs" t="Include" />
+              <e p="Sample13_ToDoApp.cs" t="Include" />
+            </e>
             <e p="ReadMe.txt" t="Include" />
             <e p="Scripts" t="Include">
               <e p="Asynchronous" t="Include">
@@ -60,13 +75,13 @@
               <e p="Observable.Concurrency.cs" t="Include" />
               <e p="Observable.Conversions.cs" t="Include" />
               <e p="Observable.Creation.cs" t="Include" />
+              <e p="Observable.cs" t="Include" />
               <e p="Observable.ErrorHandling.cs" t="Include" />
               <e p="Observable.Events.cs" t="Include" />
               <e p="Observable.FromAsync.cs" t="Include" />
               <e p="Observable.Joins.cs" t="Include" />
               <e p="Observable.Paging.cs" t="Include" />
               <e p="Observable.Time.cs" t="Include" />
-              <e p="Observable.cs" t="Include" />
               <e p="Observer.cs" t="Include" />
               <e p="Operators" t="Include">
                 <e p="Aggregate.cs" t="Include" />
@@ -150,8 +165,8 @@
               <e p="Pair.cs" t="Include" />
               <e p="Schedulers" t="Include">
                 <e p="CurrentThreadScheduler.cs" t="Include" />
-                <e p="IScheduler.cs" t="Include" />
                 <e p="ImmediateScheduler.cs" t="Include" />
+                <e p="IScheduler.cs" t="Include" />
                 <e p="Scheduler.cs" t="Include" />
                 <e p="ThreadPoolScheduler.cs" t="Include" />
               </e>
@@ -164,7 +179,7 @@
                 <e p="Subject.cs" t="Include" />
                 <e p="SubjectExtensions.cs" t="Include" />
               </e>
-              <e p="System" t="Include">
+              <e p="system" t="Include">
                 <e p="IObservable.cs" t="Include" />
                 <e p="IObserver.cs" t="Include" />
                 <e p="IOptimizedObservable.cs" t="Include" />
@@ -280,29 +295,29 @@
           </e>
         </e>
         <e p="Scripts" t="Include">
-          <e p="Block.cs" t="Include" />
-          <e p="Data.cs" t="Include" />
           <e p="GameEvents.cs" t="Include" />
-          <e p="GameRegistry.cs" t="Include" />
           <e p="Managers" t="Include">
             <e p="GameManager.cs" t="Include" />
             <e p="MakeDestroy.cs" t="Include" />
             <e p="Managers.cs" t="Include" />
+            <e p="ModsHandler.cs" t="Include" />
             <e p="StartupController.cs" t="Include" />
             <e p="WorldControl.cs" t="Include" />
             <e p="WorldGenerator.cs" t="Include" />
           </e>
-          <e p="Messenger.cs" t="Include" />
           <e p="Mod" t="Include">
-            <e p="Mod.cs" t="Include" />
+            <e p="Block.cs" t="Include" />
+            <e p="GameRegistry.cs" t="Include" />
+            <e p="IMod.cs" t="Include" />
           </e>
-          <e p="Modules" t="Include">
-            <e p="Core.cs" t="Include" />
-          </e>
-          <e p="Noise.cs" t="Include" />
           <e p="PauseScreen.cs" t="Include" />
           <e p="SettingsScreen.cs" t="Include" />
-          <e p="Timer.cs" t="Include" />
+          <e p="Utilites" t="Include">
+            <e p="Data.cs" t="Include" />
+            <e p="Messenger.cs" t="Include" />
+            <e p="Noise.cs" t="Include" />
+            <e p="Timer.cs" t="Include" />
+          </e>
         </e>
         <e p="Standard Assets" t="Include">
           <e p="Characters" t="Include">
@@ -314,21 +329,6 @@
                 <e p="MouseLook.cs" t="Include" />
                 <e p="RigidbodyFirstPersonController.cs" t="Include" />
               </e>
-            </e>
-            <e p="RollerBall" t="Include">
-              <e p="RollerBallGuidelines.txt" t="Include" />
-              <e p="Scripts" t="Include">
-                <e p="Ball.cs" t="Include" />
-                <e p="BallUserControl.cs" t="Include" />
-              </e>
-            </e>
-            <e p="ThirdPersonCharacter" t="Include">
-              <e p="Scripts" t="Include">
-                <e p="AICharacterControl.cs" t="Include" />
-                <e p="ThirdPersonCharacter.cs" t="Include" />
-                <e p="ThirdPersonUserControl.cs" t="Include" />
-              </e>
-              <e p="ThirdPersonCharacterGuidelines.txt" t="Include" />
             </e>
           </e>
           <e p="CrossPlatformInput" t="Include">
@@ -364,10 +364,10 @@
             <e p="DragRigidbody.cs" t="Include" />
             <e p="DynamicShadowSettings.cs" t="Include" />
             <e p="EventSystemChecker.cs" t="Include" />
-            <e p="FOVKick.cs" t="Include" />
-            <e p="FPSCounter.cs" t="Include" />
             <e p="FollowTarget.cs" t="Include" />
             <e p="ForcedReset.cs" t="Include" />
+            <e p="FOVKick.cs" t="Include" />
+            <e p="FPSCounter.cs" t="Include" />
             <e p="LerpControlledBob.cs" t="Include" />
             <e p="ObjectResetter.cs" t="Include" />
             <e p="ParticleSystemDestroyer.cs" t="Include" />
@@ -384,11 +384,11 @@
       </e>
       <e p="Library" t="ExcludeRecursive" />
       <e p="Mc2.sln" t="IncludeFlat" />
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="packages" t="ExcludeRecursive" />
       <e p="Temp" t="ExcludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
       </e>
-      <e p="obj" t="ExcludeRecursive" />
-      <e p="packages" t="ExcludeRecursive" />
     </e>
   </component>
 </project>

@@ -1,4 +1,6 @@
+using System.Linq;
 using mc2.general;
+using mc2.mod;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -42,7 +44,7 @@ namespace mc2.managers {
                 return;
             }
 
-            _block = Managers.FindByName(Managers.WGenerator.Voxels, "Dirt").transform;
+            _block = GameRegistry.RegisteredBlocks["Dirt"].transform;
 
             PhantomControl(hit);
 
@@ -69,7 +71,7 @@ namespace mc2.managers {
             var z = Mathf.FloorToInt(pos.z / Width);
             var chTransform = Managers.FindByName(Managers.WGenerator.Chunks, "Chunk " + x + ":" + z).transform;
 
-            var clone = Managers.WGenerator.ClonePlace(arg1.gameObject, pos, chTransform);
+            var clone = Managers.WGenerator.CloneTo(arg1.gameObject, pos, chTransform);
 
             MessageBroker.Default
                          .Publish(Messenger.Create(this, GameEvents.BlockUpdate, clone));
@@ -88,8 +90,7 @@ namespace mc2.managers {
             if (!hit.transform.CompareTag(Managers.BlockTags[1]) &&
                 !hit.transform.CompareTag(Managers.BlockTags[0])) return false;
 
-            _block = Managers.FindById(Managers.WGenerator.Voxels, hit.transform.GetComponent<Block>().Id)
-                             .transform;
+            _block = GameRegistry.RegisteredBlocks[hit.transform.GetComponent<Block>().FullName].transform;
             var namedBlock = _nameOfObj.GetComponent<Text>();
             namedBlock.text = _block.GetComponent<Block>().FullName;
             return true;
