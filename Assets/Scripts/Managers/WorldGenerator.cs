@@ -1,8 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Core;
 using mc2.general;
+using mc2.mod;
+using mc2.utils;
 using UniRx;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -38,8 +39,6 @@ namespace mc2.managers {
             _noiseMap = Noise.GenerateNoiseMap(1000, 1000, 25, random, 1, 1, 2, new Vector2());
 
             GenerateSpawnArea();
-            for (var i = 0; i < Chunks.Count; i++)
-                WorldControl.Combine(Chunks[i]);
 
             Status = ManagerStatus.Started;
         }
@@ -99,16 +98,13 @@ namespace mc2.managers {
                         var pos = new Vector3(x, y, z);
 
                         if (y == 0) {
-                            var clone = CloneTo(regBlocks["Bedrock"], pos, chunk.transform);
-                            clone.transform.SetParent(Managers.FindByName(blocks, "Bedrock").transform);
+                            CloneTo(regBlocks["Bedrock"], pos, chunk.transform);
                         }
                         else if (y == uppestPoint) {
-                            var clone = CloneTo(regBlocks["Grass"], pos, chunk.transform);
-                            clone.transform.SetParent(Managers.FindByName(blocks, "Grass").transform);
+                            CloneTo(regBlocks["Grass"], pos, chunk.transform);
                         }
                         else {
-                            var clone = CloneTo(regBlocks["Dirt"], pos, chunk.transform);
-                            clone.transform.SetParent(Managers.FindByName(blocks, "Dirt").transform);
+                            CloneTo(regBlocks["Dirt"], pos, chunk.transform);
                         }
 
                         //TODO: добавить авто-условия для генерации мира

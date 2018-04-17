@@ -1,4 +1,5 @@
 ﻿using mc2.general;
+using mc2.mod;
 using UniRx;
 using UnityEngine;
 
@@ -22,12 +23,9 @@ namespace mc2.managers {
             
             _block = obj.GetComponent<Block>();
             _block.NearestBlocks = Physics.OverlapBox(_block.transform.position, new Vector3(1.5f, 1.5f, 1.5f));
-
-            var parent = obj.transform.GetComponentInParent<Transform>();
-            Combine(parent.gameObject);
         }
 
-        internal static void Combine(GameObject combineTo) {
+        /*internal static void Combine(GameObject combineTo) {
             MeshFilter[] meshFilters = combineTo.GetComponentsInChildren<MeshFilter>();
             CombineInstance[] instances = new CombineInstance[meshFilters.Length];
 
@@ -45,6 +43,6 @@ namespace mc2.managers {
                 combineTo.AddComponent<MeshFilter>().mesh = new Mesh();
             combineTo.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(instances);
             combineTo.transform.gameObject.SetActive(true);
-        }
+        }*/
     }
 }

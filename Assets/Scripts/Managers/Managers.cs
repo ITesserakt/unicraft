@@ -1,11 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Core;
 using mc2.general;
+using mc2.mod;
 using UniRx;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace mc2.managers {
     public enum ManagerStatus {
@@ -26,19 +25,21 @@ namespace mc2.managers {
         public static WorldGenerator WGenerator { get; private set; }
         public static MakeDestroy MkDest { get; private set; }
         public static WorldControl WControl { get; private set; }
+        public static ModsHandler MHandler { get; private set; }
 
         private void Awake() {
-            new Main().PreLoad();
-            new Main().Load();
             
             Player = GameObject.FindWithTag("Player");
+            
             WGenerator = GetComponent<WorldGenerator>();
             MkDest = GetComponent<MakeDestroy>();
             WControl = Player.GetComponent<WorldControl>();
+            MHandler = GetComponent<ModsHandler>();
 
             _startSequence = new List<GameManager> {
-                MkDest,
+                MHandler,
                 WGenerator,
+                MkDest,
                 WControl
             };
 

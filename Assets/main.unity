@@ -205,7 +205,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 126759793}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 05617e86cf8591748b2bece4b2746a83, type: 3}
+  m_Script: {fileID: 11500000, guid: 500a3ed020407d743ad01cb65be9bde1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   meshes:
@@ -1259,6 +1259,7 @@ GameObject:
   - component: {fileID: 549265852}
   - component: {fileID: 549265854}
   - component: {fileID: 549265853}
+  - component: {fileID: 549265857}
   - component: {fileID: 549265855}
   - component: {fileID: 549265856}
   m_Layer: 0
@@ -1286,7 +1287,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 549265849}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 173.1276, y: 317.48, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1594597503}
@@ -1304,8 +1305,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64f9e104e0a0545bda75ca7c5aed9028, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _countOfChunks: 4
-  _height: 10
+  _countOfChunks: 3
+  _height: 8
 --- !u!114 &549265853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1356,6 +1357,17 @@ MonoBehaviour:
   _settings: {fileID: 961346854}
   _panel: {fileID: 2061737604}
   _fps: {fileID: 1138789253}
+--- !u!114 &549265857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 549265849}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d78a17981d4449b5b4bde88c635f2429, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &566699509
 GameObject:
   m_ObjectHideFlags: 0

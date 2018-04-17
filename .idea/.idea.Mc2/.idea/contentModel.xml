@@ -295,29 +295,29 @@
           </e>
         </e>
         <e p="Scripts" t="Include">
-          <e p="Block.cs" t="Include" />
-          <e p="Data.cs" t="Include" />
           <e p="GameEvents.cs" t="Include" />
-          <e p="GameRegistry.cs" t="Include" />
           <e p="Managers" t="Include">
             <e p="GameManager.cs" t="Include" />
             <e p="MakeDestroy.cs" t="Include" />
             <e p="Managers.cs" t="Include" />
+            <e p="ModsHandler.cs" t="Include" />
             <e p="StartupController.cs" t="Include" />
             <e p="WorldControl.cs" t="Include" />
             <e p="WorldGenerator.cs" t="Include" />
           </e>
-          <e p="Messenger.cs" t="Include" />
           <e p="Mod" t="Include">
+            <e p="Block.cs" t="Include" />
+            <e p="GameRegistry.cs" t="Include" />
             <e p="IMod.cs" t="Include" />
           </e>
-          <e p="Modules" t="Include">
-            <e p="Core.cs" t="Include" />
-          </e>
-          <e p="Noise.cs" t="Include" />
           <e p="PauseScreen.cs" t="Include" />
           <e p="SettingsScreen.cs" t="Include" />
-          <e p="Timer.cs" t="Include" />
+          <e p="Utilites" t="Include">
+            <e p="Data.cs" t="Include" />
+            <e p="Messenger.cs" t="Include" />
+            <e p="Noise.cs" t="Include" />
+            <e p="Timer.cs" t="Include" />
+          </e>
         </e>
         <e p="Standard Assets" t="Include">
           <e p="Characters" t="Include">
