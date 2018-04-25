@@ -1,5 +1,5 @@
-﻿using mc2.general;
-using mc2.mod;
+﻿using mc2.mod;
+using mc2.utils;
 using UniRx;
 using UnityEngine;
 
@@ -7,6 +7,8 @@ using UnityEngine;
 namespace mc2.managers {
     public class WorldControl : GameManager {
         private Block _block;
+        
+        private WorldControl() {}
 
         protected internal override void Loading(GameManager manager) {
             base.Loading(manager);
@@ -22,7 +24,7 @@ namespace mc2.managers {
                 return;
             
             _block = obj.GetComponent<Block>();
-            _block.NearestBlocks = Physics.OverlapBox(_block.transform.position, new Vector3(1.5f, 1.5f, 1.5f));
+//            _block.NearestBlocks = Physics.OverlapBox(_block.transform.position, new Vector3(1.5f, 1.5f, 1.5f));
         }
 
         /*internal static void Combine(GameObject combineTo) {

@@ -1,11 +1,12 @@
-using System.Linq;
-using mc2.general;
 using mc2.mod;
+using mc2.ui;
+using mc2.utils;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace mc2.managers {
+    [DontLoadOnStatup]
     public class MakeDestroy : GameManager {
         public const float MaxDistance = 6f, MinDistance = 1.05f;
         private const byte Width = WorldGenerator.Width;
@@ -14,6 +15,8 @@ namespace mc2.managers {
         private Camera _camera;
         private GameObject _highLight;
         private GameObject _nameOfObj;
+
+        private MakeDestroy() { }
 
         protected internal override void Loading(GameManager manager) {
             base.Loading(this);
@@ -30,7 +33,7 @@ namespace mc2.managers {
             Status = ManagerStatus.Started;
         }
 
-        private void Update() {
+        protected internal override void Update_() {
 
             if (PauseScreen.IsPause.Value) {
                 _highLight.SetActive(false);
@@ -48,19 +51,14 @@ namespace mc2.managers {
 
             PhantomControl(hit);
 
-            if (Input.GetMouseButtonUp(0)) {
-                MessageBroker.Default
-                             .Publish(Messenger.Create(this, GameEvents.LeftCl, hit));
-            }
+            if (Input.GetMouseButton(0))
+                MessageBroker.Default.Publish(Messenger.Create(this, GameEvents.LeftCl, hit));
 
-            if (Input.GetMouseButtonUp(1)) {
-                MessageBroker.Default
-                             .Publish(Messenger.Create(this, GameEvents.RightCl, hit, _block));
-            }
+            if (Input.GetMouseButton(1))
+                MessageBroker.Default.Publish(Messenger.Create(this, GameEvents.RightCl, hit, _block));
 
-            if (Input.GetMouseButtonUp(2))
-                MessageBroker.Default
-                             .Publish(Messenger.Create(this, GameEvents.MidCl, hit));
+            if (Input.GetMouseButton(2))
+                MessageBroker.Default.Publish(Messenger.Create(this, GameEvents.MidCl, hit));
         }
 
         public bool RightClick(Transform arg1, RaycastHit arg2) {
@@ -69,9 +67,15 @@ namespace mc2.managers {
 
             var x = Mathf.FloorToInt(pos.x / Width);
             var z = Mathf.FloorToInt(pos.z / Width);
-            var chTransform = Managers.FindByName(Managers.WGenerator.Chunks, "Chunk " + x + ":" + z).transform;
+            Transform chTransform = null;
+            try {
+                chTransform = Managers.FindByName(((WorldGenerator) Managers.StartSequence[1]).Chunks,
+                                                  "Chunk " + x + ":" + z).transform;
+            }
+            catch { /**/}
 
-            var clone = Managers.WGenerator.CloneTo(arg1.gameObject, pos, chTransform);
+            var clone =
+                ((WorldGenerator) Managers.StartSequence[1]).CloneTo(arg1.gameObject, pos, chTransform);
 
             MessageBroker.Default
                          .Publish(Messenger.Create(this, GameEvents.BlockUpdate, clone));

@@ -1,19 +1,22 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using UniRx;
 using UnityEngine;
 
 namespace mc2.managers {
+    [DontLoadOnStatup]
     public class ModsHandler : GameManager {
-        private readonly string _appFolder = @"c://Games/MC2";
 
         protected internal override void Loading(GameManager manager) {
-            base.Loading(manager);
+            base.Loading(this);
 
-            if (!Directory.Exists(_appFolder + @"\Plugins"))
-                Directory.CreateDirectory(_appFolder + @"\Plugins");
+            var appFolder = Managers.AppFolder;
 
-            var dirs = Directory.GetFiles(_appFolder + @"\Plugins", "*.dll", SearchOption.AllDirectories);
+            if (!Directory.Exists(appFolder + @"\Plugins"))
+                Directory.CreateDirectory(appFolder + @"\Plugins");
+
+            var dirs = Directory.GetFiles(appFolder + @"\Plugins", "*.dll", SearchOption.AllDirectories);
 
             foreach (var file in dirs) {
                 var mAssemly = Assembly.LoadFrom(file);
@@ -32,5 +35,7 @@ namespace mc2.managers {
 
             Status = ManagerStatus.Started;
         }
+
+        private ModsHandler() { }
     }
 }
