@@ -1,28 +1,25 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using mc2.general;
 using mc2.mod;
 using mc2.utils;
 using UniRx;
 using UnityEngine;
-using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
 
 namespace mc2.managers {
-    [DontLoadOnStatup]
     public class WorldGenerator : GameManager {
         public const byte Width = 16;
 
         [Range(1, 10)] [SerializeField] private int _countOfChunks = 4, _height = 8;
         private float[,] _noiseMap;
 
-        private byte _numberOfClones, _numberOfInstances;
+        private uint _numberOfClones, _numberOfInstances;
         private GameObject _world;
 
         public List<GameObject> World { get; private set; }
         public List<GameObject> Chunks { get; private set; }
-
-        private WorldGenerator() { }
 
         protected internal override void Loading(GameManager manager) {
             base.Loading(this);
@@ -39,8 +36,8 @@ namespace mc2.managers {
                                                              _countOfChunks / 2 * 16 + 1);
 
             var random = Random.Range(0, int.MaxValue);
-            _noiseMap = Noise.GenerateNoiseMap(10000, 10000, 25, random, 1, 1, 2, new Vector2());
-            
+            _noiseMap = Noise.GenerateNoiseMap(1000, 1000, 25, random, 1, 1, 2, new Vector2());
+
             GenerateSpawnArea();
 
             Status = ManagerStatus.Started;
@@ -72,9 +69,10 @@ namespace mc2.managers {
         }*/
 
         private void GenerateSpawnArea() {
-            for (var x = 0; x < 3; x++)
-                for (var z = 0; z < 3; z++) {
-                    StartCoroutine(MakeChunk(x, z, _world.transform));
+            for (var x = 0; x < _countOfChunks; x++)
+                for (var z = 0; z < _countOfChunks; z++) {
+                    MakeChunk(x, z, _world.transform).ToObservable()
+                                                     .Subscribe();
                 }
         }
 
@@ -85,7 +83,7 @@ namespace mc2.managers {
 
             var regBlocks = GameRegistry.RegisteredBlocks;
             var blocks = new GameObject[regBlocks.Count];
-
+            
             var i = 0;
             foreach (var key in regBlocks.Keys) {
                 blocks[i] = new GameObject(key);
@@ -120,10 +118,7 @@ namespace mc2.managers {
             chunk.transform.SetParent(wTransform);
             Chunks.Add(chunk);
 
-            if (_numberOfInstances > 60) {
-                _numberOfInstances = 0;
-                yield return new WaitForEndOfFrame();
-            }
+            yield return null;
         }
 
         /// <summary>
@@ -139,7 +134,7 @@ namespace mc2.managers {
             var clone = Instantiate(origGo, pos, origGo.transform.rotation);
             clone.name = origGo.GetComponent<Block>().FullName + ":" + _numberOfClones;
             _numberOfClones++;
-            clone.tag = clone.GetComponent<Block>().IsHarvest ? Managers.BlockTags[0] : Managers.BlockTags[1];
+            clone.tag = clone.GetComponent<Block>().IsHarvest ? Managers.BlockTags[1] : Managers.BlockTags[0];
             clone.transform.SetParent(chTransform);
             World.Add(clone);
             return clone;

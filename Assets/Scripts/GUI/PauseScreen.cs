@@ -3,10 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace mc2.ui {
+namespace mc2.general {
     public sealed class PauseScreen : MonoBehaviour {
 
-        [SerializeField] private GameObject _pause;
+        [SerializeField] private GameObject _panel;
         [SerializeField] private GameObject _settings;
         
         private GameObject _rButton;
@@ -21,9 +21,9 @@ namespace mc2.ui {
 
             IsPause.Subscribe(_ => FirstPersonController.IsPause = IsPause.Value);
 
-            _rButton = _pause.transform.Find("Resume").gameObject;
-            _qButton = _pause.transform.Find("Quit").gameObject;
-            _sButton = _pause.transform.Find("Settings").gameObject;
+            _rButton = _panel.transform.Find("Resume").gameObject;
+            _qButton = _panel.transform.Find("Quit").gameObject;
+            _sButton = _panel.transform.Find("Settings").gameObject;
 
             _rButton.GetComponent<Button>().OnClickAsObservable()
                     .Subscribe(_ => OnClickR());
@@ -39,7 +39,7 @@ namespace mc2.ui {
                       .Subscribe(_ => {
                           if (_settings.activeSelf) return;
                           if (!IsPause.Value) {
-                              _pause.gameObject.SetActive(true);
+                              _panel.SetActive(true);
                               Time.timeScale = 0;
 
                               Cursor.lockState = CursorLockMode.None;
@@ -48,7 +48,7 @@ namespace mc2.ui {
                               IsPause.Value = !IsPause.Value;
                           }
                           else {
-                              _pause.gameObject.SetActive(false);
+                              _panel.SetActive(false);
                               Time.timeScale = 1;
 
                               Cursor.lockState = CursorLockMode.Locked;
@@ -64,7 +64,7 @@ namespace mc2.ui {
         }
 
         private void OnClickR() {
-            _pause.gameObject.SetActive(false);
+            _panel.SetActive(false);
             Time.timeScale = 1;
                               
             Cursor.lockState = CursorLockMode.Locked;
@@ -74,7 +74,7 @@ namespace mc2.ui {
         }
 
         private void OnClickS() {
-            _pause.gameObject.SetActive(false);
+            _panel.SetActive(false);
             _settings.SetActive(true);
         }
     }

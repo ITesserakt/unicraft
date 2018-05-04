@@ -295,11 +295,7 @@
           </e>
         </e>
         <e p="Scripts" t="Include">
-          <e p="GUI" t="Include">
-            <e p="LoadScene.cs" t="Include" />
-            <e p="PauseScreen.cs" t="Include" />
-            <e p="SettingsScreen.cs" t="Include" />
-          </e>
+          <e p="GameEvents.cs" t="Include" />
           <e p="Managers" t="Include">
             <e p="GameManager.cs" t="Include" />
             <e p="MakeDestroy.cs" t="Include" />
@@ -314,9 +310,10 @@
             <e p="GameRegistry.cs" t="Include" />
             <e p="IMod.cs" t="Include" />
           </e>
+          <e p="PauseScreen.cs" t="Include" />
+          <e p="SettingsScreen.cs" t="Include" />
           <e p="Utilites" t="Include">
             <e p="Data.cs" t="Include" />
-            <e p="GameEvents.cs" t="Include" />
             <e p="Messenger.cs" t="Include" />
             <e p="Noise.cs" t="Include" />
             <e p="Timer.cs" t="Include" />

@@ -1,5 +1,5 @@
 using System;
-using mc2.utils;
+using mc2.general;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,8 +14,8 @@ namespace mc2.managers {
                          .Receive<Messenger>()
                          .Where(msg => msg.Id == GameEvents.ManagersInProgress)
                          .Subscribe(
-                             m => _progressBar.value = Mathf.Clamp01(
-                                 (float) (Convert.ToDecimal(m.Data[0]) / Convert.ToDecimal(m.Data[1])))
+                             msg => _progressBar.value =
+                                 (float) (Convert.ToDecimal(msg.Data[0]) / Convert.ToDecimal(msg.Data[1]))
                          );
             MessageBroker.Default
                          .Receive<Messenger>()
