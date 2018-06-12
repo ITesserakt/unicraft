@@ -1,36 +1,38 @@
-using System.Linq;
 using mc2.general;
 using mc2.mod;
-using UniRx;
+using mc2.ui;
+using mc2.utils;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace mc2.managers {
-    public class MakeDestroy : GameManager {
+namespace mc2.managers
+{
+    [DontLoadOnStatup]
+    public class MakeDestroy : GameManager
+    {
         public const float MaxDistance = 6f, MinDistance = 1.05f;
-        private const byte Width = WorldGenerator.Width;
+        private const byte Width = WorldGenerator.WidthForChunk;
 
-        private Transform _block;
+        private Transform _activeBlock;
         private Camera _camera;
         private GameObject _highLight;
         private GameObject _nameOfObj;
 
-        protected internal override void Loading(GameManager manager) {
-            base.Loading(this);
+        private MakeDestroy() { }
 
-            _nameOfObj = GameObject.Find("NameOfObj");
-            if (!IsLoad(_nameOfObj, "NameOfObj")) return;
+        protected internal override void Loading()
+        {
+            base.Loading();
 
-            _highLight = GameObject.Find("HighLight");
-            if (!IsLoad(_highLight, "HighLight")) return;
-
+            _nameOfObj = LoadAndCheckForNull("NameOfObj");
+            _highLight = LoadAndCheckForNull("HighLight");
             _camera = Camera.main;
-            if (!IsLoad(_camera, "Camera")) return;
 
             Status = ManagerStatus.Started;
         }
 
-        private void Update() {
+        protected internal override void Update_()
+        {
 
             if (PauseScreen.IsPause.Value) {
                 _highLight.SetActive(false);
@@ -44,68 +46,78 @@ namespace mc2.managers {
                 return;
             }
 
-            _block = GameRegistry.RegisteredBlocks["Dirt"].transform;
+            _activeBlock = GameRegistry.RegisteredBlocks["Dirt"].transform;
 
             PhantomControl(hit);
 
-            if (Input.GetMouseButtonUp(0)) {
-                MessageBroker.Default
-                             .Publish(Messenger.Create(this, GameEvents.LeftCl, hit));
-            }
+            if (Input.GetMouseButtonUp(0)) 
+                Messenger.PublishEvent(this, GameEvents.LeftCl, hit);
 
-            if (Input.GetMouseButtonUp(1)) {
-                MessageBroker.Default
-                             .Publish(Messenger.Create(this, GameEvents.RightCl, hit, _block));
-            }
+            else if (Input.GetMouseButtonUp(1))
+                Messenger.PublishEvent(this, GameEvents.RightCl, hit, _activeBlock);
 
-            if (Input.GetMouseButtonUp(2))
-                MessageBroker.Default
-                             .Publish(Messenger.Create(this, GameEvents.MidCl, hit));
+            else if (Input.GetMouseButtonUp(2))
+                Messenger.PublishEvent(this, GameEvents.MidCl, hit);
         }
 
-        public bool RightClick(Transform arg1, RaycastHit arg2) {
-            var pos = arg2.transform.position;
-            pos += arg2.normal;
+        public void RightClick(Transform arg1, RaycastHit arg2)
+        {
+            #region vars
 
+            var pos = arg2.transform.position;
             var x = Mathf.FloorToInt(pos.x / Width);
             var z = Mathf.FloorToInt(pos.z / Width);
-            var chTransform = Managers.FindByName(Managers.WGenerator.Chunks, "Chunk " + x + ":" + z).transform;
+            var chTransform = WorldGenerator.GetChunk(x, z)?.transform;
+            var generator = Managers.GetManager<WorldGenerator>();
 
-            var clone = Managers.WGenerator.CloneTo(arg1.gameObject, pos, chTransform);
+            #endregion
 
-            MessageBroker.Default
-                         .Publish(Messenger.Create(this, GameEvents.BlockUpdate, clone));
-            return clone != null;
+            pos += arg2.normal;
+            if (chTransform == null)
+                generator.MakeChunk(x, z);
+
+            var clone = generator.PutBlock(arg1.gameObject, pos, chTransform);
+
+            Messenger.PublishEvent(this, GameEvents.BlockUpdate, clone);
         }
 
-        public bool LeftClick(RaycastHit hit) {
-            if (hit.transform.CompareTag(Managers.BlockTags[0]))
+        public void LeftClick(RaycastHit hit)
+        {
+            var block = Block.Get(hit);
+            if (block && block.IsHarvest)
                 Destroy(hit.collider.gameObject);
-            MessageBroker.Default
-                         .Publish(Messenger.Create(this, GameEvents.BlockUpdate, hit.transform.gameObject));
-            return true;
+
+            Messenger.PublishEvent(this, GameEvents.BlockUpdate, hit.transform.gameObject);
         }
 
-        public bool MiddleClick(RaycastHit hit) {
-            if (!hit.transform.CompareTag(Managers.BlockTags[1]) &&
-                !hit.transform.CompareTag(Managers.BlockTags[0])) return false;
+        public void MiddleClick(RaycastHit hit)
+        {
+            var block = Block.Get(hit);
+            if (!block)
+                return;
 
-            _block = GameRegistry.RegisteredBlocks[hit.transform.GetComponent<Block>().FullName].transform;
+            var blockName = block.FullName;
             var namedBlock = _nameOfObj.GetComponent<Text>();
-            namedBlock.text = _block.GetComponent<Block>().FullName;
-            return true;
+
+            _activeBlock = GameRegistry.RegisteredBlocks[blockName].transform;
+            namedBlock.text = blockName;
         }
 
 
-        private void PhantomControl(RaycastHit hit) {
-            if (!hit.collider.CompareTag(Managers.BlockTags[0]) && !hit.collider.CompareTag(Managers.BlockTags[1]) &&
-                (Managers.Player.transform.position - hit.transform.position).sqrMagnitude > MaxDistance ||
-                (Managers.Player.transform.position - hit.transform.position).sqrMagnitude < MinDistance)
+        private void PhantomControl(RaycastHit hit)
+        {
+            var hitTransf = hit.transform;
+            var highLTransf = _highLight.transform;
+
+            if ((Data.Player.transform.position - hitTransf.position).sqrMagnitude > MaxDistance ||
+                (Data.Player.transform.position - hitTransf.position).sqrMagnitude < MinDistance ||
+                !Block.Get(hit))
                 _highLight.SetActive(false);
 
-            if (hit.transform.GetComponent<MeshFilter>() != null)
-                _highLight.GetComponent<MeshFilter>().mesh = hit.transform.GetComponent<MeshFilter>().mesh;
-            _highLight.transform.position = hit.transform.position;
+            _highLight.GetComponent<MeshFilter>().mesh = hitTransf.GetComponent<MeshFilter>()?.mesh;
+
+            highLTransf.position = hitTransf.position;
+            highLTransf.localScale = hitTransf.localScale + new Vector3(.01f, .01f, .01f);
             _highLight.SetActive(true);
         }
     }

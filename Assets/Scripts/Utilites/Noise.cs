@@ -1,4 +1,9 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using UniRx;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace mc2.utils {
     public class Noise {

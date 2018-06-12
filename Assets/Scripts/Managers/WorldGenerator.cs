@@ -1,124 +1,119 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using mc2.general;
+using System.Threading;
+using System.Threading.Tasks;
 using mc2.mod;
 using mc2.utils;
 using UniRx;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace mc2.managers {
+    [DontLoadOnStatup]
     public class WorldGenerator : GameManager {
-        public const byte Width = 16;
+        public const byte WidthForChunk = 16;
 
-        [Range(1, 10)] [SerializeField] private int _countOfChunks = 4, _height = 8;
-        private float[,] _noiseMap;
+        [Range(4, 1024)] [SerializeField] private int _width = 64;
+        [Range(1, 64)] [SerializeField] private int _height = 8;
 
-        private uint _numberOfClones, _numberOfInstances;
+        private ulong _numberOfClones;
+        private byte _numberOfInstances;
         private GameObject _world;
 
-        public List<GameObject> World { get; private set; }
-        public List<GameObject> Chunks { get; private set; }
+        private List<GameObject> Chunks { get; set; }
 
-        protected internal override void Loading(GameManager manager) {
-            base.Loading(this);
+        [Header("Параметры генератора")] [SerializeField]
+        private int _seed;
 
-            World = new List<GameObject>();
+        [SerializeField] [Range(0, 32)] private float _roughness = 2f;
+
+        private WorldGenerator() { }
+
+        protected internal override void Loading() {
+            base.Loading();
+
             Chunks = new List<GameObject>();
-            _noiseMap = new float[Width * _countOfChunks, Width * _countOfChunks];
             _world = new GameObject("World");
 
-            var hud = GameObject.Find("HUD");
-            if (!IsLoad(hud, "HUD")) return;
+            _seed = _seed != 0 ? _seed : Random.Range(-1000, 1000);
 
-            Managers.Player.transform.position = new Vector3(_countOfChunks / 2 * 16 + 1, _height + 10,
-                                                             _countOfChunks / 2 * 16 + 1);
-
-            var random = Random.Range(0, int.MaxValue);
-            _noiseMap = Noise.GenerateNoiseMap(1000, 1000, 25, random, 1, 1, 2, new Vector2());
-
-            GenerateSpawnArea();
+            Data.Player.transform.position = new Vector3(_width * .5f, _height + 20, _width * .5f);
 
             Status = ManagerStatus.Started;
         }
 
-        /*private void Generator() {
-            var playerPos = Managers.Player.transform;
-            var playerPosFChunk = new Vector2Int(Mathf.FloorToInt(playerPos.position.x / Width),
-                                                 Mathf.FloorToInt(playerPos.position.y / Width));
-            
-            var nearFPlayerChunks = new[] {
-                playerPosFChunk - Vector2Int.one,
-                playerPosFChunk - Vector2Int.right,
-                playerPosFChunk - new Vector2Int(1, -1),
-                playerPosFChunk - Vector2Int.up,
-                playerPosFChunk,
-                playerPosFChunk - Vector2Int.down,
-                playerPosFChunk - new Vector2Int(-1, 1),
-                playerPosFChunk - Vector2Int.left,
-                playerPosFChunk - new Vector2Int(-1, -1)
-            };
-                
-            for (var i = 0; i < 9; i++)
-                if (Managers.FindByName(Chunks, "Chunk " + nearFPlayerChunks[i].x + ":" + nearFPlayerChunks[i].y) ==
-                    null) {
-                    MakeChunk(nearFPlayerChunks[i].x, nearFPlayerChunks[i].y, _world.transform).ToObservable()
-                                                                                               .Subscribe();
-                }
-        }*/
+        protected internal override void Update_() {
+            Generator();
+        }
 
-        private void GenerateSpawnArea() {
-            for (var x = 0; x < _countOfChunks; x++)
-                for (var z = 0; z < _countOfChunks; z++) {
-                    MakeChunk(x, z, _world.transform).ToObservable()
-                                                     .Subscribe();
+        private void Generator() {
+            var a = Mathf.FloorToInt(Data.Player.transform.position.x / WidthForChunk);
+            var b = Mathf.FloorToInt(Data.Player.transform.position.z / WidthForChunk);
+            for (var x = -3; x < 3; x++)
+                for (var z = -3; z < 3; z++) {
+                    var chunk = GetChunk(x + a, z + b);
+
+                    if (!chunk)
+                        MakeChunk(x + a, z + b);
+                    else if (x == 3 || z == 3 || x == -3 || z == -3)
+                        chunk.SetActive(false);
+                    else
+                        chunk.SetActive(true);
                 }
         }
 
-        private IEnumerator MakeChunk(int deltax, int deltaz, Transform wTransform) {
-            int deltaX = deltax * Width, deltaZ = deltaz * Width;
+        public void MakeChunk(int deltax, int deltaz) {
+            #region vars
 
-            var chunk = new GameObject(string.Format("Chunk {0}:{1}", deltax, deltaz));
+            int deltaX = deltax * WidthForChunk, deltaZ = deltaz * WidthForChunk;
+            var chunk = new GameObject($"Chunk {deltax}:{deltaz}").transform;
 
-            var regBlocks = GameRegistry.RegisteredBlocks;
-            var blocks = new GameObject[regBlocks.Count];
-            
-            var i = 0;
-            foreach (var key in regBlocks.Keys) {
-                blocks[i] = new GameObject(key);
-                i++;
-            }
+            var worldTransform = _world.transform;
 
-            for (var x = deltaX; x < deltaX + Width; x++)
-                for (var z = deltaZ; z < deltaZ + Width; z++) {
-                    var uppestPoint = Mathf.RoundToInt(_height * _noiseMap[x, z]);
+            #endregion
+
+            EvalPosAndClone(new Vector2Int(deltaX, deltaZ), chunk);
+
+            chunk.SetParent(worldTransform);
+            Chunks.Add(chunk.gameObject);
+        }
+
+        private async void EvalPosAndClone(Vector2Int delta, Transform chunk) {
+            var noiseMap = Noise.GenerateNoiseMap(WidthForChunk, WidthForChunk, _roughness, _seed, 8, 1, 1, delta);
+
+            for (var x = delta.x; x < delta.x + WidthForChunk; x++)
+                for (var z = delta.y; z < delta.y + WidthForChunk; z++) {
+                    var uppestPoint = Mathf.RoundToInt(_height * noiseMap[x - delta.x, z - delta.y]);
 
                     for (var y = 0; y <= uppestPoint; y++) {
                         var pos = new Vector3(x, y, z);
-
-                        if (y == 0) {
-                            CloneTo(regBlocks["Bedrock"], pos, chunk.transform);
-                        }
-                        else if (y == uppestPoint) {
-                            CloneTo(regBlocks["Grass"], pos, chunk.transform);
-                        }
-                        else {
-                            CloneTo(regBlocks["Dirt"], pos, chunk.transform);
-                        }
-
-                        //TODO: добавить авто-условия для генерации мира
+                        GenerateBlock(chunk, pos);
                     }
+
+                    await BlocksPerTick();
                 }
+        }
 
-            foreach (var block in blocks) {
-                block.transform.SetParent(chunk.transform);
-            }
+        private async Task BlocksPerTick() {
+            if (_numberOfInstances < 15) return;
+            _numberOfInstances = 0;
+            await Task.Delay(5);
+        }
 
-            chunk.transform.SetParent(wTransform);
-            Chunks.Add(chunk);
+        private void GenerateBlock(Transform chunk, Vector3 pos) {
+            bool make;
 
-            yield return null;
+            do {
+                var num = Random.Range(0, GameRegistry.BlockSpawnChance.Count);
+                var genProps = GameRegistry.BlockSpawnChance[num];
+                var chance = genProps.ChanceToSpawn;
+
+                make = chance - 1 == Random.Range(0, chance);
+                if (make)
+                    PutBlock(genProps.Item as Block, pos, chunk);
+            } while (!make);
         }
 
         /// <summary>
@@ -128,16 +123,27 @@ namespace mc2.managers {
         /// <param name="pos">Позиция для нового блока</param>
         /// <param name="chTransform">Чанк, куда следует внести новый блок</param>
         /// <returns></returns>
-        public GameObject CloneTo(GameObject origGo, Vector3 pos, Transform chTransform) {
-            if (origGo == null) return null;
+        public GameObject PutBlock(GameObject origGo, Vector3 pos, Transform chTransform) {
+            if (origGo == null) throw new ArgumentNullException(nameof(origGo));
 
             var clone = Instantiate(origGo, pos, origGo.transform.rotation);
-            clone.name = origGo.GetComponent<Block>().FullName + ":" + _numberOfClones;
+            var blockCom = Block.Get(origGo);
+
+            clone.name = blockCom.FullName + ":" + _numberOfClones;
             _numberOfClones++;
-            clone.tag = clone.GetComponent<Block>().IsHarvest ? Managers.BlockTags[1] : Managers.BlockTags[0];
+            clone.tag = "Block";
             clone.transform.SetParent(chTransform);
-            World.Add(clone);
+
             return clone;
         }
+
+        public void ReplaceWith(GameObject from, GameObject to, Transform chTransform) {
+            var pos = from.transform.position;
+            PutBlock(to, pos, chTransform);
+            Destroy(from);
+        }
+
+        public static GameObject GetChunk(int x, int z) =>
+            Managers.FindByName(Managers.GetManager<WorldGenerator>().Chunks, $"Chunk {x}:{z}");
     }
 }

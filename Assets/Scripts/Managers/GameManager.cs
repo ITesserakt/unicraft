@@ -1,28 +1,31 @@
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace mc2.managers
 {
-    public abstract class GameManager : MonoBehaviour
-    {
-        public ManagerStatus Status { get; protected set; }
-
+    public abstract class GameManager : MonoBehaviour {
+        public ManagerStatus Status { get; protected internal set; } = ManagerStatus.Shutdown;
         public Exception Exception { get; private set; }
 
-        protected internal virtual void Loading(GameManager manager)
+        protected internal virtual void Loading()
         {
-            Debug.Log(string.Format("Module {0} still starting", manager));
             Status = ManagerStatus.Initializing;
         }
 
-        protected bool IsLoad(Object obj, string n)
+        protected static GameObject LoadAndCheckForNull(string gObjToLoad)
         {
-            if (obj != null)
-                return true;
-            Status = ManagerStatus.Shutdown;
-            Exception = new Exception("Object " + n + " not loaded");
-            return false;
+            var g = GameObject.Find(gObjToLoad);
+            if (g != null)
+                return g;
+            throw new NullReferenceException();
+        }
+
+        protected internal abstract void Update_();
+
+        public override string ToString() {
+            return base.ToString().Split('(')[1].Split(')')[0].Split('.')[2];
         }
     }
 }

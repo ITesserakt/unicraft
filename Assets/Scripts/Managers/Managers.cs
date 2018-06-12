@@ -1,95 +1,103 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using mc2.general;
-using mc2.mod;
-using UniRx;
+using mc2.utils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using Debug = UnityEngine.Debug;
 
 namespace mc2.managers {
-    public enum ManagerStatus {
-        Shutdown,
-        Initializing,
-        Started
-    }
 
     public sealed class Managers : MonoBehaviour {
-        public static readonly List<string> BlockTags = new List<string> {
-            "BreakableBlock",
-            "UnbreakableBlock"
-        };
-
-        private List<GameManager> _startSequence;
         
-        public static GameObject Player { get; private set; }
-        public static WorldGenerator WGenerator { get; private set; }
-        public static MakeDestroy MkDest { get; private set; }
-        public static WorldControl WControl { get; private set; }
-        public static ModsHandler MHandler { get; private set; }
+        private static List<GameManager> StartSequence { get; } = new List<GameManager>();
 
         private void Awake() {
-            
-            Player = GameObject.FindWithTag("Player");
-            
-            WGenerator = GetComponent<WorldGenerator>();
-            MkDest = GetComponent<MakeDestroy>();
-            WControl = Player.GetComponent<WorldControl>();
-            MHandler = GetComponent<ModsHandler>();
+            DontDestroyOnLoad(gameObject);
+            StartSequence.Clear();
+            ManagersToLoad();
 
-            _startSequence = new List<GameManager> {
-                MHandler,
-                WGenerator,
-                MkDest,
-                WControl
-            };
+            StartupManagers();
 
-            Observable.FromCoroutine(StartupManagers)
-                      .Subscribe(_ => Debug.Log("All modules started"));
+            Messenger.SubscribeOnEvent<Messenger>(msg => {
+                if (msg.Id == GameEvents.ChangeScene) Awake();
+            });
         }
 
-        private IEnumerator StartupManagers() {
-            _startSequence.ForEach(
-                manager => manager.Loading(manager)
-            );
+        private void Update() {
+            StartSequence.ForEach(m => m?.Update_());
+        }
 
-            yield return null;
+        public static T GetManager<T>() where T : GameManager
+        {
+            T manager = StartSequence.First(m => m is T).To<T>();
+            if (manager == null)
+                throw new InvalidOperationException("Данный менеджер либо недоступен, либо несуществует");
 
-            var numModules = _startSequence.Count;
+            return manager;
+        }
+
+        private void ManagersToLoad() {
+            var result = from manager in GetComponents<GameManager>()
+                         where !Attribute.IsDefined(manager.GetType(), typeof(DontLoadOnStatupAttribute))
+                         || SceneManager.GetActiveScene().name != "Load_scene"
+                         select manager;
+
+            StartSequence.AddRange(result);
+        }
+
+        private void StartupManagers() {
+
+            LoadManagers();
+
+            var numModules = StartSequence.Count;
             var numReady = 0;
 
             while (numReady < numModules) {
                 numReady = 0;
 
-                foreach (var manager in _startSequence)
-                    switch (manager.Status) {
-                        case ManagerStatus.Started:
-                            numReady++;
-                            break;
-                        case ManagerStatus.Shutdown:
-                            Debug.Log(string.Format("Something wrong in module {0}, in object {1}", manager,
-                                                    manager.Exception));
-                            break;
-                    }
+                for (var i = 0; i < StartSequence.Count; i++) {
+                    GameManager manager = StartSequence[i];
+                    numReady = Switch(numReady, manager);
+                }
 
-
-                Debug.Log(string.Format("Loading process: {0}/{1}", numReady, numModules));
-                MessageBroker.Default
-                             .Publish(Messenger.Create(this, GameEvents.ManagersInProgress, numReady, numModules));
-
-
-                yield return new WaitForEndOfFrame();
+                Messenger.PublishEvent(this, GameEvents.ManagersInProgress, numReady, numModules);
             }
 
-            MessageBroker.Default
-                         .Publish(Messenger.Create(this, GameEvents.ManagersStarted, null));
+            Messenger.PublishEvent(this, GameEvents.ManagersStarted);
         }
 
-        public static GameObject FindByName(IEnumerable<GameObject> collection, string name) {
-            return collection.FirstOrDefault(g => g != null && g.name == name);
+        private static int Switch(int numReady, GameManager manager) {
+            switch (manager.Status) {
+                case ManagerStatus.Started:
+                    numReady++;
+                    break;
+                case ManagerStatus.Shutdown:
+                    break;
+                case ManagerStatus.Initializing:
+                    break;
+                case ManagerStatus.Exception:
+                    Debug.LogError($"Что-то не так в модуле {manager}, с объектом {manager.Exception.Message}");
+                    manager.Status = ManagerStatus.Shutdown;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return numReady;
         }
 
-        public static GameObject FindById(IEnumerable<GameObject> collection, uint id) {
-            return collection.FirstOrDefault(g => g != null && g.GetComponent<Block>().Id == id);
+        private static void LoadManagers() {
+            StartSequence.ForEach(m => m?.Loading());
+        }
+
+        public static GameObject FindByName(IEnumerable<GameObject> collection, string forename) {
+            foreach (var go in collection) {
+                if (go != null && go.name == forename) return go;
+            }
+
+            return null;
         }
     }
 }

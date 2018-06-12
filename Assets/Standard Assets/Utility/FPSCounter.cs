@@ -1,38 +1,39 @@
-using System;
 using UnityEngine;
+using System.Collections;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 
-namespace UnityStandardAssets.Utility
-{
-    [RequireComponent(typeof (Text))]
-    public class FPSCounter : MonoBehaviour
-    {
-        const float fpsMeasurePeriod = 0.5f;
-        private int m_FpsAccumulator = 0;
-        private float m_FpsNextPeriod = 0;
-        private int m_CurrentFps;
-        const string display = "{0} FPS";
-        private Text m_Text;
+namespace UnityStandardAssets.Utility {
 
+    public class FPSCounter : MonoBehaviour {
+        [SerializeField] private float _frequency;
+		private bool isOn = true;
+        [SerializeField] private Text _fpsText;
+        
+        public static int FramesPerSec { get; protected set; }
 
-        private void Start()
-        {
-            m_FpsNextPeriod = Time.realtimeSinceStartup + fpsMeasurePeriod;
-            m_Text = GetComponent<Text>();
+        private void OnEnable() {
+            Fps();
         }
 
+        private async void Fps() {
+            while(isOn) {
+                // Capture frame-per-second
+                var lastFrameCount = Time.frameCount;
+                var lastTime = Time.realtimeSinceStartup;
+                await Task.Delay((int)(_frequency * 1000));
+                var timeSpan = Time.realtimeSinceStartup - lastTime;
+                var frameCount = Time.frameCount - lastFrameCount;
 
-        private void Update()
-        {
-            // measure average frames per second
-            m_FpsAccumulator++;
-            if (Time.realtimeSinceStartup > m_FpsNextPeriod)
-            {
-                m_CurrentFps = (int) (m_FpsAccumulator/fpsMeasurePeriod);
-                m_FpsAccumulator = 0;
-                m_FpsNextPeriod += fpsMeasurePeriod;
-                m_Text.text = string.Format(display, m_CurrentFps);
+                // Display it
+                FramesPerSec = Mathf.RoundToInt(frameCount / timeSpan);
+				if (_fpsText != null)
+					_fpsText.text = $"{FramesPerSec} fps";
             }
+        }
+
+        private void OnDestroy() {
+			isOn = false;
         }
     }
 }

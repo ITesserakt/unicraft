@@ -1,36 +1,56 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using mc2.utils;
 using UnityEngine;
 
 namespace mc2.managers {
+    [DontLoadOnStatup]
     public class ModsHandler : GameManager {
-        private readonly string _appFolder = @"c://Games/MC2";
 
-        protected internal override void Loading(GameManager manager) {
-            base.Loading(manager);
+        protected internal override void Loading() {
+            base.Loading();
 
-            if (!Directory.Exists(_appFolder + @"\Plugins"))
-                Directory.CreateDirectory(_appFolder + @"\Plugins");
+            var pluginsFolder = Data.PluginsFolder;
 
-            var dirs = Directory.GetFiles(_appFolder + @"\Plugins", "*.dll", SearchOption.AllDirectories);
+            if (!Directory.Exists(pluginsFolder))
+                Directory.CreateDirectory(pluginsFolder);
+
+            var dirs = Directory.GetFiles(pluginsFolder, "*.dll", SearchOption.AllDirectories);
 
             foreach (var file in dirs) {
                 var mAssemly = Assembly.LoadFrom(file);
+                foreach (var type in mAssemly.GetTypes())
+                    Debug.Log(type.FullName);
                 var mClass = mAssemly.GetType(mAssemly.GetName().Name + ".Main");
 
-                if (mClass.GetInterface("IMod", true) == null) continue;
+                if (mClass?.GetInterface("IMod", true) == null) continue;
                 var mClObj = Activator.CreateInstance(mClass, null, null);
                 var pLMethod = mClass.GetMethod("PreLoad");
                 var lMethod = mClass.GetMethod("Load");
 
-                Debug.Assert(pLMethod != null, "pLMethod != null");
-                pLMethod.Invoke(mClObj, null);
-                Debug.Assert(lMethod != null, "lMethod != null");
-                lMethod.Invoke(mClObj, null);
+                try {
+                    pLMethod?.Invoke(mClObj, null);
+                }
+                catch (Exception ex) {
+                    Debug.LogError(
+                        $"В методе 'PreLoad' сборки {mAssemly.GetName().Name} зафиксирована ошибка ({ex.InnerException})");
+                }
+
+                try {
+                    lMethod?.Invoke(mClObj, null);
+                }
+                catch (Exception ex) {
+                    Debug.LogError(
+                        $"В методе 'Load' сборки {mAssemly.GetName().Name} зафиксирована ошибка ({ex.Source})");
+                }
             }
 
             Status = ManagerStatus.Started;
         }
+
+        protected internal override void Update_() { }
+
+        private ModsHandler() { }
     }
 }

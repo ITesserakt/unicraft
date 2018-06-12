@@ -1,4 +1,6 @@
 ﻿using mc2.managers;
+using mc2.utils;
+using TMPro;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +14,7 @@ namespace mc2.ui {
         [SerializeField] private GameObject _fps;
         
         private Toggle _fullscreenTo;
-        private Dropdown _qualityDl;
+        private TMP_Dropdown _qualityDl;
         private Slider _soundS;
         private Button _backB;
         private AudioSource _sound;
@@ -25,14 +27,13 @@ namespace mc2.ui {
                          .Subscribe(_ => ToggleFullscreen());
 
 
-            _qualityDl = transform.Find("QualityT").Find("QualityDL").GetComponent<Dropdown>();
-            _qualityDl.onValueChanged.AsObservable()
-                      .Subscribe(SetQuality);
+            _qualityDl = transform.Find("QualityT").Find("QualityDL").GetComponent<TMP_Dropdown>();
+            _qualityDl.onValueChanged.AsObservable().Subscribe(SetQuality);
             SetQuality(_qualityDl.value);
 
             
-            if (Managers.Player != null) {
-                _sound = Managers.Player.GetComponent<AudioSource>();
+            if (Data.Player != null) {
+                _sound = Data.Player.GetComponent<AudioSource>();
                 _soundS = transform.Find("SoundT").Find("SoundS").GetComponent<Slider>();
                 _soundS.onValueChanged.AsObservable()
                        .Subscribe(x => _sound.volume = x / 100);

@@ -1,48 +1,63 @@
-﻿using mc2.utils;
+﻿using mc2.general;
+using mc2.utils;
 using UnityEngine;
+using static mc2.mod.GameRegistry;
+using System.Linq;
 
 namespace mc2.mod {
-    public class BlockFactory : IFactory{
-        private string _shortName;
-        private string _fullName;
 
-        public Block Generate() {
-            var g = GameObject.CreatePrimitive(PrimitiveType.Cube); 
+    // ReSharper disable once UnusedMember.Global
+    public class BlockFactory : IFactory {
+        public string ShortName { private get; set; }
+        public string FullName { private get; set; }
+        public Vector3 Rotation { private get; set; }
+        public Mesh Mesh1 { private get; set; }
+        public Material[] Materials { private get; set; }
+        public bool IsHarvestable { private get; set; }
+
+        public IItem Generate() {
+
+            var g = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
             var block = g.AddComponent<Block>();
-            
-            block.Id = GameRegistry.RegId();
-            block.ShortName = GameRegistry.RegSName(_shortName + "_block");
-            block.FullName = GameRegistry.RegFName(_fullName);
-            block.IsHarvest = IsHarvest;
+            block.Id = RegId();
+            block.Sender = g.transform;
+            block.ShortName = RegSName(ShortName + "_block");
+            block.FullName = RegFName(FullName);
+            block.IsHarvest = IsHarvestable;
 
-            g.GetComponent<Renderer>().sharedMaterials = Mats;
-            g.GetComponent<MeshFilter>().sharedMesh = Mesh;
+            g.GetComponent<Renderer>().sharedMaterials = Materials;
+            g.GetComponent<MeshFilter>().sharedMesh = Mesh1;
 
-            g.name = _fullName;
+            g.name = FullName;
 
             g.transform.Rotate(Rotation);
 
-            GameRegistry.RegBlock(g, block);
-            
+            RegBlock(g, block);
+
             return block;
         }
 
-        public BlockFactory(string shortName, string fullName, Mesh mesh = null, Material[] mats = null,
-                            bool isHarvest = true, Vector3 rotation = default(Vector3)) {
-            _shortName = shortName;
-            _fullName = fullName;
-            IsHarvest = isHarvest;
-            Mats = mats;
-            Mesh = mesh ?? GameObject.Find("Data").GetComponent<Data>().Meshes[0];
-            Rotation = rotation;
+        private BlockFactory() {
+            ShortName = null;
+            FullName = null;
+            IsHarvestable = true;
+            Materials = null;
+            Mesh1 = null;
+            Rotation = default(Vector3);
         }
 
-        public Vector3 Rotation { private get; set; }
-
-        public Mesh Mesh { private get; set; }
-
-        public Material[] Mats { private get; set; }
-
-        public bool IsHarvest { private get; set; }
+        public static BlockFactory Setup(string fullName,
+                                         string shortName, Material[] mats, Mesh mesh = null, bool isHarvest = true,
+                                         Vector3 rotation = default(Vector3)) {
+            return new BlockFactory {
+                FullName = fullName,
+                IsHarvestable = isHarvest,
+                Materials = mats,
+                Mesh1 = mesh ? mesh : GameObject.Find("Data").GetComponent<Data>().Meshes[0],
+                Rotation = rotation,
+                ShortName = shortName
+            };
+        }
     }
 }

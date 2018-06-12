@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
 
-namespace mc2.general {
+namespace mc2.ui {
     public sealed class PauseScreen : MonoBehaviour {
 
         [SerializeField] private GameObject _panel;
@@ -23,7 +23,7 @@ namespace mc2.general {
 
             _rButton = _panel.transform.Find("Resume").gameObject;
             _qButton = _panel.transform.Find("Quit").gameObject;
-            _sButton = _panel.transform.Find("Settings").gameObject;
+            _sButton = _panel.transform.Find("SettingsB").gameObject;
 
             _rButton.GetComponent<Button>().OnClickAsObservable()
                     .Subscribe(_ => OnClickR());
@@ -49,7 +49,7 @@ namespace mc2.general {
                           }
                           else {
                               _panel.SetActive(false);
-                              Time.timeScale = 1;
+                              Time.timeScale = 1f;
 
                               Cursor.lockState = CursorLockMode.Locked;
                               Cursor.visible = false;
@@ -65,7 +65,7 @@ namespace mc2.general {
 
         private void OnClickR() {
             _panel.SetActive(false);
-            Time.timeScale = 1;
+            Time.timeScale = 1f;
                               
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;

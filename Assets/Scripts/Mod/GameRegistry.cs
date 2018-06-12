@@ -1,48 +1,63 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-namespace mc2.mod {
+namespace mc2.mod
+{
     public static class GameRegistry {
         
-        public static Dictionary<string, GameObject> RegisteredBlocks { get; private set; }
+        internal static Dictionary<string, GameObject> RegisteredBlocks { get; }
 
-        private static uint _bufferedId;
-        private static string[] _namesBuffered = new string[0];
+        internal static List<GenerationProperties> BlockSpawnChance { get; }
+
+        private static int _bufferedId;
+        private static readonly List<string> NamesBuffered = new List<string>();
 
         static GameRegistry() {
             RegisteredBlocks = new Dictionary<string, GameObject>();
+            BlockSpawnChance = new List<GenerationProperties>();
         }
 
-        public static uint RegId() {
+        internal static int RegId() {
             return _bufferedId++;
         }
 
-        public static string RegSName(string shortName) {
-            if (_namesBuffered.Contains(shortName)) {
-                throw new ArgumentException("Блок с данным названием уже существует", "shortName");
+        internal static string RegSName(string shortName) {
+            if (NamesBuffered.Contains(shortName)) {
+                throw new ArgumentException("Блок с данным названием уже существует", nameof(shortName));
             }
 
-            Array.Resize(ref _namesBuffered, _namesBuffered.Length + 1);
-            _namesBuffered[_namesBuffered.Length - 1] = shortName;
-
+            NamesBuffered.Add(shortName);
             return shortName;
         }
 
-        public static string RegFName(string fullName) {
-            if (_namesBuffered.Contains(fullName)) {
-                throw new ArgumentException("Блок с данным названием уже существует", "fullName");
+        internal static string RegFName(string fullName) {
+            if (NamesBuffered.Contains(fullName)) {
+                throw new ArgumentException("Блок с данным названием уже существует", nameof(fullName));
             }
 
-            Array.Resize(ref _namesBuffered, _namesBuffered.Length + 1);
-            _namesBuffered[_namesBuffered.Length - 1] = fullName;
-
+            NamesBuffered.Add(fullName);
             return fullName;
         }
 
-        public static void RegBlock(GameObject gameObject, Block block) {
+        public static void RegWorldGen(IItem block, int chance, int latitude) {
+            BlockSpawnChance.Add(new GenerationProperties(block, chance, latitude));
+        }
+
+        internal static void RegBlock(GameObject gameObject, IItem block) {
             RegisteredBlocks.Add(block.FullName, gameObject);
+        }
+    }
+
+    internal class GenerationProperties {
+        internal IItem Item { get; }
+        internal int ChanceToSpawn { get; }
+        internal int Latitude { get; }
+
+        public GenerationProperties(IItem item, int chanceToSpawn, int latitude) {
+            Item = item;
+            ChanceToSpawn = chanceToSpawn;
+            Latitude = latitude;
         }
     }
 }
