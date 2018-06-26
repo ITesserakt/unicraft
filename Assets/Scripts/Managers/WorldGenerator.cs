@@ -27,8 +27,6 @@ namespace mc2.managers {
         [Header("Параметры генератора")] [SerializeField]
         private int _seed;
 
-        [SerializeField] [Range(0, 32)] private float _roughness = 2f;
-
         private WorldGenerator() { }
 
         protected internal override void Loading() {
@@ -44,20 +42,20 @@ namespace mc2.managers {
             Status = ManagerStatus.Started;
         }
 
-        protected internal override void Update_() {
+        protected internal override void OnUpdate() {
             Generator();
         }
 
         private void Generator() {
             var a = Mathf.FloorToInt(Data.Player.transform.position.x / WidthForChunk);
             var b = Mathf.FloorToInt(Data.Player.transform.position.z / WidthForChunk);
-            for (var x = -3; x < 3; x++)
-                for (var z = -3; z < 3; z++) {
+            for (var x = -4; x < 4; x++)
+                for (var z = -4; z < 4; z++) {
                     var chunk = GetChunk(x + a, z + b);
 
                     if (!chunk)
                         MakeChunk(x + a, z + b);
-                    else if (x == 3 || z == 3 || x == -3 || z == -3)
+                    else if (x == 4 || z == 4 || x == -4 || z == -4)
                         chunk.SetActive(false);
                     else
                         chunk.SetActive(true);
@@ -80,29 +78,33 @@ namespace mc2.managers {
             Chunks.Add(chunk.gameObject);
         }
 
-        private async void EvalPosAndClone(Vector2Int delta, Transform chunk) {
-            var noiseMap = Noise.GenerateNoiseMap(WidthForChunk, WidthForChunk, _roughness, _seed, 8, 1, 1, delta);
-
-            for (var x = delta.x; x < delta.x + WidthForChunk; x++)
-                for (var z = delta.y; z < delta.y + WidthForChunk; z++) {
-                    var uppestPoint = Mathf.RoundToInt(_height * noiseMap[x - delta.x, z - delta.y]);
-
-                    for (var y = 0; y <= uppestPoint; y++) {
-                        var pos = new Vector3(x, y, z);
-                        GenerateBlock(chunk, pos);
-                    }
-
-                    await BlocksPerTick();
-                }
+        private void EvalPosAndClone(Vector2Int delta, Transform chunk) {
+//            var noiseMap = Noise.GenerateNoiseMap(WidthForChunk, WidthForChunk, _roughness, _seed, 8, 1, 1, delta);
+//
+//            for (var x = delta.x; x < delta.x + WidthForChunk; x++)
+//                for (var z = delta.y; z < delta.y + WidthForChunk; z++) {
+//                    var uppestPoint = Mathf.RoundToInt(_height * noiseMap[x - delta.x, z - delta.y]);
+//
+//                    for (var y = 0; y <= uppestPoint; y++) {
+//                        var pos = new Vector3(x, y, z);
+//                        GenerateBlock(chunk, pos, uppestPoint);
+//                    }
+//
+//                    BlocksPerTick();
+//                }
+            
+            for(var x = delta.x; x < delta.x + WidthForChunk; x++)
+                for (var z = delta.y; z < delta.y + WidthForChunk; z++)
+                    PutBlock(GameRegistry.RegisteredBlocks["Dirt"], new Vector3(x, 0, z), chunk);
         }
 
-        private async Task BlocksPerTick() {
-            if (_numberOfInstances < 15) return;
-            _numberOfInstances = 0;
-            await Task.Delay(5);
+        private async void BlocksPerTick() {
+//            if (_numberOfInstances < 15) return;
+//            _numberOfInstances = 0;
+            await Task.Delay(1);
         }
 
-        private void GenerateBlock(Transform chunk, Vector3 pos) {
+        private async void GenerateBlock(Transform chunk, Vector3 pos, int maxHeight) {
             bool make;
 
             do {
@@ -111,8 +113,14 @@ namespace mc2.managers {
                 var chance = genProps.ChanceToSpawn;
 
                 make = chance - 1 == Random.Range(0, chance);
-                if (make)
+                if (!make) continue;
+
+                if(genProps.Latitude <= pos.y && !genProps.Invert)
                     PutBlock(genProps.Item as Block, pos, chunk);
+                else if (genProps.Latitude <= maxHeight - pos.y && genProps.Invert)
+                    PutBlock(genProps.Item as Block, pos, chunk);
+
+                await Task.Delay(5);
             } while (!make);
         }
 
@@ -127,7 +135,7 @@ namespace mc2.managers {
             if (origGo == null) throw new ArgumentNullException(nameof(origGo));
 
             var clone = Instantiate(origGo, pos, origGo.transform.rotation);
-            var blockCom = Block.Get(origGo);
+            var blockCom = (Block)origGo;
 
             clone.name = blockCom.FullName + ":" + _numberOfClones;
             _numberOfClones++;

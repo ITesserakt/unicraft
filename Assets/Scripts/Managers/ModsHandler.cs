@@ -20,8 +20,6 @@ namespace mc2.managers {
 
             foreach (var file in dirs) {
                 var mAssemly = Assembly.LoadFrom(file);
-                foreach (var type in mAssemly.GetTypes())
-                    Debug.Log(type.FullName);
                 var mClass = mAssemly.GetType(mAssemly.GetName().Name + ".Main");
 
                 if (mClass?.GetInterface("IMod", true) == null) continue;
@@ -49,7 +47,7 @@ namespace mc2.managers {
             Status = ManagerStatus.Started;
         }
 
-        protected internal override void Update_() { }
+        protected internal override void OnUpdate() { }
 
         private ModsHandler() { }
     }

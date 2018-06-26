@@ -19,13 +19,13 @@ namespace mc2.managers
             var g = GameObject.Find(gObjToLoad);
             if (g != null)
                 return g;
-            throw new NullReferenceException();
+            throw new NullReferenceException(gObjToLoad);
         }
 
-        protected internal abstract void Update_();
+        protected internal abstract void OnUpdate();
 
         public override string ToString() {
-            return base.ToString().Split('(')[1].Split(')')[0].Split('.')[2];
+            return base.ToString().Split('(')[1].Split(')')[0];
         }
     }
 }

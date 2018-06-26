@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace mc2.utils {
@@ -16,10 +17,13 @@ namespace mc2.utils {
         private static string SetAppFolder()
         {
 #if UNITY_STANDALONE_LINUX
-            return @"~/.config/MC2";
+            return @"/.config/MC2";
 #endif
 #if UNITY_STANDALONE_WIN
             return @"C://Games/MC2";
+#endif
+#if UNITY_METRO
+            return "";
 #endif
         }
     }

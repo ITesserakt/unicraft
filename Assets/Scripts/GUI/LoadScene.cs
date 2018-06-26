@@ -7,24 +7,14 @@ using UnityEngine.UI;
 
 namespace mc2.ui {
     public class LoadScene : MonoBehaviour {
-        [SerializeField] private Button _loadBut;
-        [SerializeField] private Image _loadAmount;
 
-        private void Start() {
-            _loadBut.OnClickAsObservable()
-                    .Subscribe(_ => {
-                        _loadAmount.gameObject.SetActive(true);
-                        LoadSceneAsync(1);
-                    });
+        public void LoadSceneAsync(int num) {
+            SceneManager.LoadSceneAsync(num).AsAsyncOperationObservable()
+                        .Subscribe(_ => PubEvChange());
         }
 
-        private void LoadSceneAsync(int num) {
-            SceneManager.LoadSceneAsync(num).AsAsyncOperationObservable()
-                        .Do(p => {
-                            if(_loadAmount != null)
-                                _loadAmount.fillAmount = p.progress * .9f;
-                        })
-                        .Subscribe(_ => Messenger.PublishEvent(this, GameEvents.ChangeScene));
+        private void PubEvChange() {
+            MessageBroker.Default.Publish(Messenger.Create(this, GameEvents.ChangeScene));
         }
     }
 }

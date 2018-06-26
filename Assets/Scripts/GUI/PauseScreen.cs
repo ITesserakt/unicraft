@@ -1,7 +1,6 @@
 ﻿using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityStandardAssets.Characters.FirstPerson;
 
 namespace mc2.ui {
     public sealed class PauseScreen : MonoBehaviour {
@@ -13,13 +12,9 @@ namespace mc2.ui {
         private GameObject _qButton;
         private GameObject _sButton;
 
-        public static ReactiveProperty<bool> IsPause;
+        public static bool IsPause { get; private set; }
 
         private void Start() {
-
-            IsPause = new ReactiveProperty<bool>(false);
-
-            IsPause.Subscribe(_ => FirstPersonController.IsPause = IsPause.Value);
 
             _rButton = _panel.transform.Find("Resume").gameObject;
             _qButton = _panel.transform.Find("Quit").gameObject;
@@ -38,14 +33,14 @@ namespace mc2.ui {
                       .Where(_ => Input.GetKeyUp(KeyCode.Escape))
                       .Subscribe(_ => {
                           if (_settings.activeSelf) return;
-                          if (!IsPause.Value) {
+                          if (!IsPause) {
                               _panel.SetActive(true);
                               Time.timeScale = 0;
 
                               Cursor.lockState = CursorLockMode.None;
                               Cursor.visible = true;
 
-                              IsPause.Value = !IsPause.Value;
+                              IsPause = !IsPause;
                           }
                           else {
                               _panel.SetActive(false);
@@ -54,7 +49,7 @@ namespace mc2.ui {
                               Cursor.lockState = CursorLockMode.Locked;
                               Cursor.visible = false;
 
-                              IsPause.Value = !IsPause.Value;
+                              IsPause = !IsPause;
                           }
                       });
         }
@@ -70,7 +65,7 @@ namespace mc2.ui {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
                               
-            IsPause.Value = !IsPause.Value;
+            IsPause = !IsPause;
         }
 
         private void OnClickS() {

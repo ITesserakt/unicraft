@@ -22,26 +22,17 @@ namespace mc2.mod
             return _bufferedId++;
         }
 
-        internal static string RegSName(string shortName) {
-            if (NamesBuffered.Contains(shortName)) {
-                throw new ArgumentException("Блок с данным названием уже существует", nameof(shortName));
+        internal static string RegName(string name) {
+            if (NamesBuffered.Contains(name)) {
+                throw new ArgumentException($"Блок с данным названием ({name}) уже существует", nameof(name));
             }
 
-            NamesBuffered.Add(shortName);
-            return shortName;
+            NamesBuffered.Add(name);
+            return name;
         }
 
-        internal static string RegFName(string fullName) {
-            if (NamesBuffered.Contains(fullName)) {
-                throw new ArgumentException("Блок с данным названием уже существует", nameof(fullName));
-            }
-
-            NamesBuffered.Add(fullName);
-            return fullName;
-        }
-
-        public static void RegWorldGen(IItem block, int chance, int latitude) {
-            BlockSpawnChance.Add(new GenerationProperties(block, chance, latitude));
+        public static void RegWorldGen(IItem block, int chance, int latitude, bool invertLatitude = false) {
+            BlockSpawnChance.Add(new GenerationProperties(block, chance, latitude, invertLatitude));
         }
 
         internal static void RegBlock(GameObject gameObject, IItem block) {
@@ -53,11 +44,13 @@ namespace mc2.mod
         internal IItem Item { get; }
         internal int ChanceToSpawn { get; }
         internal int Latitude { get; }
+        internal bool Invert { get; }
 
-        public GenerationProperties(IItem item, int chanceToSpawn, int latitude) {
+        public GenerationProperties(IItem item, int chanceToSpawn, int latitude, bool invertLat) {
             Item = item;
             ChanceToSpawn = chanceToSpawn;
             Latitude = latitude;
+            Invert = invertLat;
         }
     }
 }

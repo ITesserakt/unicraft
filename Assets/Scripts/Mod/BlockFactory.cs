@@ -1,8 +1,6 @@
-﻿using mc2.general;
-using mc2.utils;
+﻿using mc2.utils;
 using UnityEngine;
 using static mc2.mod.GameRegistry;
-using System.Linq;
 
 namespace mc2.mod {
 
@@ -21,9 +19,8 @@ namespace mc2.mod {
 
             var block = g.AddComponent<Block>();
             block.Id = RegId();
-            block.Sender = g.transform;
-            block.ShortName = RegSName(ShortName + "_block");
-            block.FullName = RegFName(FullName);
+            block.ShortName = RegName(ShortName + "_block");
+            block.FullName = RegName(FullName);
             block.IsHarvest = IsHarvestable;
 
             g.GetComponent<Renderer>().sharedMaterials = Materials;

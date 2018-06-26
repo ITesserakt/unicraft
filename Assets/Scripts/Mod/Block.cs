@@ -1,4 +1,6 @@
 ﻿using System;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 
 namespace mc2.mod {
@@ -9,7 +11,6 @@ namespace mc2.mod {
         [SerializeField] private string _shortName;
         [SerializeField] private string _fullName;
         [SerializeField] private bool _isHarvest;
-        [SerializeField] private Transform _sender;
 
         private Block() { }
 
@@ -35,16 +36,12 @@ namespace mc2.mod {
             internal set { _isHarvest = value; }
         }
 
-        public Transform Sender {
-            get { return _sender; }
-            internal set { _sender = value; }
-        }
-
         #endregion
 
-        public static implicit operator GameObject(Block b) => b.Sender.gameObject;
+        public static implicit operator GameObject(Block b) => b.gameObject;
+        public static explicit operator Block(GameObject g) => Get(g);
 
-        public static Block Get(GameObject g) {
+        private static Block Get(GameObject g) {
             var block = g.GetComponent<Block>();
             if (block)
                 return block;
@@ -52,7 +49,12 @@ namespace mc2.mod {
             throw new InvalidOperationException("Игровой объект должен быть блоком");
         }
 
-        public static Block Get(Transform t) => Get(t.gameObject);
-        public static Block Get(RaycastHit hit) => Get(hit.transform);
+        public static bool IsBlock(GameObject g) {
+            var block = g.GetComponent<Block>();
+            return block;
+        }
+
+        public static bool IsBlock(Transform t) => IsBlock(t.gameObject);
+        public static bool IsBlock(RaycastHit hit) => IsBlock(hit.transform);
     }
 }

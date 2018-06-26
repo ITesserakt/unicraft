@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using mc2.general;
 using mc2.utils;
+using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
@@ -20,18 +21,18 @@ namespace mc2.managers {
 
             StartupManagers();
 
-            Messenger.SubscribeOnEvent<Messenger>(msg => {
-                if (msg.Id == GameEvents.ChangeScene) Awake();
-            });
+            MessageBroker.Default.Receive<Messenger>()
+                         .Where(msg => msg.Id == GameEvents.ChangeScene)
+                         .Subscribe(_ => Awake());
         }
 
         private void Update() {
-            StartSequence.ForEach(m => m?.Update_());
+            StartSequence.ForEach(m => m.OnUpdate());
         }
 
         public static T GetManager<T>() where T : GameManager
         {
-            T manager = StartSequence.First(m => m is T).To<T>();
+            var manager = StartSequence.First(m => m is T).To<T>();
             if (manager == null)
                 throw new InvalidOperationException("Данный менеджер либо недоступен, либо несуществует");
 
@@ -58,14 +59,16 @@ namespace mc2.managers {
                 numReady = 0;
 
                 for (var i = 0; i < StartSequence.Count; i++) {
-                    GameManager manager = StartSequence[i];
+                    var manager = StartSequence[i];
                     numReady = Switch(numReady, manager);
                 }
 
-                Messenger.PublishEvent(this, GameEvents.ManagersInProgress, numReady, numModules);
+                MessageBroker.Default.Publish(
+                    Messenger.Create(this, GameEvents.ManagersInProgress, numReady, numModules));
             }
 
-            Messenger.PublishEvent(this, GameEvents.ManagersStarted);
+            MessageBroker.Default.Publish(
+                Messenger.Create(this, GameEvents.ManagersStarted));
         }
 
         private static int Switch(int numReady, GameManager manager) {
@@ -89,15 +92,11 @@ namespace mc2.managers {
         }
 
         private static void LoadManagers() {
-            StartSequence.ForEach(m => m?.Loading());
+            StartSequence.ForEach(m => m.Loading());
         }
 
         public static GameObject FindByName(IEnumerable<GameObject> collection, string forename) {
-            foreach (var go in collection) {
-                if (go != null && go.name == forename) return go;
-            }
-
-            return null;
+            return collection.FirstOrDefault(go => go != null && go.name == forename);
         }
     }
 }

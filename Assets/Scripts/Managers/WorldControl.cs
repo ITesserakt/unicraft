@@ -14,14 +14,13 @@ namespace mc2.managers {
 
         protected internal override void Loading() {
             base.Loading();
-            Messenger.SubscribeOnEvent<Messenger>(msg => {
-                if (msg.Id == GameEvents.BlockUpdate)
-                    OnBUpdate(msg.Data[0] as GameObject);
-            });
+            MessageBroker.Default.Receive<Messenger>()
+                         .Where(msg => msg.Id == GameEvents.BlockUpdate)
+                         .Subscribe(msg => _block = msg.Data[0] as Block);
             Status = ManagerStatus.Started;
         }
 
-        protected internal override void Update_() {}
+        protected internal override void OnUpdate() {}
 
         private void OnBUpdate(GameObject obj) {
 //            _block.NearestBlocks = Physics.OverlapBox(_block.transform.position, new Vector3(1.5f, 1.5f, 1.5f));

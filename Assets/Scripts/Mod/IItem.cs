@@ -7,6 +7,5 @@ namespace mc2.mod
         int Id { get; }
         string ShortName { get; }
         string FullName { get; }
-        Transform Sender { get; }
     }
 }

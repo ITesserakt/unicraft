@@ -14,7 +14,6 @@ namespace mc2.ui {
         [SerializeField] private GameObject _fps;
         
         private Toggle _fullscreenTo;
-        private TMP_Dropdown _qualityDl;
         private Slider _soundS;
         private Button _backB;
         private AudioSource _sound;
@@ -25,11 +24,6 @@ namespace mc2.ui {
             _fullscreenTo = transform.Find("FullscreenT").Find("FullscreenTo").GetComponent<Toggle>();
             _fullscreenTo.OnValueChangedAsObservable()
                          .Subscribe(_ => ToggleFullscreen());
-
-
-            _qualityDl = transform.Find("QualityT").Find("QualityDL").GetComponent<TMP_Dropdown>();
-            _qualityDl.onValueChanged.AsObservable().Subscribe(SetQuality);
-            SetQuality(_qualityDl.value);
 
             
             if (Data.Player != null) {
